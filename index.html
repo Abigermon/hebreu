@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mémorisation Vocabulaire Hébreu</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .stats-bar {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+
+        .card-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            min-height: 200px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .french-word {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .hebrew-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 15px;
+            direction: rtl;
+        }
+
+        .hint-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .btn-know {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            flex: 1;
+        }
+
+        .btn-know:hover {
+            background-color: #15803d;
+        }
+
+        .btn-dont-know {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            flex: 1;
+        }
+
+        .btn-dont-know:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-audio {
+            font-size: 1rem;
+            margin-top: 15px;
+            background: #e0e7ff;
+            border: none;
+            color: var(--primary);
+            padding: 8px 16px;
+        }
+
+        .btn-audio:hover {
+            background: #c7d2fe;
+        }
+
+        .list-container {
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .td-hebrew {
+            direction: rtl;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Style du menu des catégories avec détails */
+.category-progress-container {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.cat-progress-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.progress-bar-bg {
+    background: #e2e8f0;
+    border-radius: 6px;
+    height: 8px;
+    width: 100px;
+    overflow: hidden;
+    margin-left: 10px;
+}
+
+.progress-bar-fill {
+    background: var(--danger);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Vocabulaire Hébreu</h1>
+    </header>
+
+    <div class="controls">
+        <select id="categorySelect" onchange="filterCategory()">
+            <option value="ALL">Toutes les catégories</option>
+        </select>
+
+        <select id="levelSelect" onchange="filterData()">
+            <option value="ALL">Tous les niveaux</option>
+            <option value="Aleph">Niveau Aleph (א)</option>
+            <option value="Beth">Niveau Beth (ב)</option>
+            <option value="Guimel">Niveau Guimel (ג)</option>
+        </select>
+
+        <button onclick="shuffleWords()">🔀 Mélanger</button>
+        <button onclick="toggleListView()">📋 Mode Liste</button>
+        <button id="reviewBtn" onclick="reviewUnknownWords()">📖 Réviser les mots à réviser</button>
+        <button onclick="resetProgress()">🔄 Réinitialiser</button>
+    </div>
+ 
+    <div class="stats-bar">
+        <span>Cartes : <strong id="currentStats">0 / 0</strong></span>
+        <span>Maîtrisés : <strong id="knownCount" style="color:var(--success)">0</strong></span>
+        <span>À réviser : <strong id="unknownCount" style="color:var(--danger)">0</strong></span>
+    </div>
+
+    <div id="flashcardView">
+        <div class="card-container">
+            <button class="nav-btn" onclick="prevCard()">←</button>
+            
+            <div id="card" class="card" onclick="revealAnswer()">
+                <div id="frenchText" class="french-word">Chargement...</div>
+                <div id="hebrewContainer" class="hidden">
+                    <div id="hebrewText" class="hebrew-word"></div>
+                    <button class="btn-audio" onclick="event.stopPropagation(); speakHebrew();">🔊 Écouter</button>
+                </div>
+                <div id="hint" class="hint-text">Cliquez pour afficher le mot en hébreu</div>
+            </div>
+
+            <button class="nav-btn" onclick="nextCard()">→</button>
+        </div>
+
+        <div id="answerActions" class="actions">
+            <button class="btn-dont-know" onclick="markAnswer(false)">❌ Je ne connais pas</button>
+            <button class="btn-know" onclick="markAnswer(true)">✅ Je connais</button>
+        </div>
+    </div>
+
+    <div id="listView" class="list-container hidden">
+        <h3>Mots de la catégorie</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Français</th>
+                    <th style="text-align: right;">Hébreu</th>
+                    <th>Écouter</th>
+                </tr>
+            </thead>
+            <tbody id="wordsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let isReviewMode = false;
+
+const rawData = [
+
+//Education 
+{ categorie: "Education", francais: "École", hebreu: "בית ספר", niveau: "Aleph" },
+{ categorie: "Education", francais: "Classe", hebreu: "כיתה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Enseignant / Enseignante", hebreu: "מורה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Élève / Étudiant", hebreu: "תלמיד", niveau: "Aleph" },
+{ categorie: "Education", francais: "Livre", hebreu: "ספר", niveau: "Aleph" },
+{ categorie: "Education", francais: "Cahier", hebreu: "מחברת", niveau: "Aleph" },
+{ categorie: "Education", francais: "Crayon", hebreu: "עיפרון", niveau: "Aleph" },
+{ categorie: "Education", francais: "Stylo", hebreu: "עט", niveau: "Aleph" },
+{ categorie: "Education", francais: "Table / Bureau", hebreu: "שולחן", niveau: "Aleph" },
+{ categorie: "Education", francais: "Chaise", hebreu: "כיסא", niveau: "Aleph" },
+{ categorie: "Education", francais: "Tableau", hebreu: "לוח", niveau: "Aleph" },
+{ categorie: "Education", francais: "Sac à dos / Cartable", hebreu: "תיק", niveau: "Aleph" },
+{ categorie: "Education", francais: "Cours / Leçon", hebreu: "שיעור", niveau: "Aleph" },
+{ categorie: "Education", francais: "Devoirs", hebreu: "שיעורי בית", niveau: "Aleph" },
+{ categorie: "Education", francais: "Récréation / Pause", hebreu: "הפסקה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Ami / Camarade", hebreu: "חבר", niveau: "Aleph" },
+{ categorie: "Education", francais: "Question", hebreu: "שאלה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Réponse", hebreu: "תשובה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Examen / Contrôle", hebreu: "מבחן", niveau: "Aleph" },
+{ categorie: "Education", francais: "Feuille / Page", hebreu: "דף", niveau: "Aleph" },
+{ categorie: "Education", francais: "Mot", hebreu: "מילה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Phrase", hebreu: "משפט", niveau: "Aleph" },
+{ categorie: "Education", francais: "Bibliothèque", hebreu: "ספרייה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Vacances / Congé", hebreu: "חופש", niveau: "Aleph" },
+{ categorie: "Education", francais: "Étudier / Apprendre", hebreu: "ללמוד", niveau: "Aleph" },
+{ categorie: "Education", francais: "Lire", hebreu: "לקרוא", niveau: "Aleph" },
+{ categorie: "Education", francais: "Écrire", hebreu: "לכתוב", niveau: "Aleph" },
+{ categorie: "Education", francais: "Demander / Poser une question", hebreu: "לשאול", niveau: "Aleph" },
+{ categorie: "Education", francais: "Travail / Devoir", hebreu: "עבודה", niveau: "Aleph" },
+{ categorie: "Education", francais: "Ulpan (école de langue)", hebreu: "אולפן", niveau: "Aleph" },
+{ categorie: "Education", francais: "Enfance", hebreu: "ילדות", niveau: "Aleph" },
+{ categorie: "Education", francais: "Je suis désolé pour / si", hebreu: "צר לי על / אם", niveau: "Aleph" },
+{ categorie: "Education", francais: "Tu es unique", hebreu: "אין כמוך", niveau: "Aleph" },
+{ categorie: "Education", francais: "Avoir besoin de", hebreu: "לזקוק", niveau: "Aleph" },
+
+{ categorie: "Education", francais: "Note / Résultat", hebreu: "ציון", niveau: "Beth" },
+{ categorie: "Education", francais: "Emploi du temps", hebreu: "מערכת שעות", niveau: "Beth" },
+{ categorie: "Education", francais: "Directeur / Principal", hebreu: "מנהל", niveau: "Beth" },
+{ categorie: "Education", francais: "Sujet / Thème", hebreu: "נושא", niveau: "Beth" },
+{ categorie: "Education", francais: "Matière scolaire", hebreu: "מקצוע", niveau: "Beth" },
+{ categorie: "Education", francais: "Langue", hebreu: "שפה", niveau: "Beth" },
+{ categorie: "Education", francais: "Calcul / Arithmétique", hebreu: "חשבון", niveau: "Beth" },
+{ categorie: "Education", francais: "Mathématiques", hebreu: "מתמטיקה", niveau: "Beth" },
+{ categorie: "Education", francais: "Histoire", hebreu: "היסטוריה", niveau: "Beth" },
+{ categorie: "Education", francais: "Dictionnaire", hebreu: "מילון", niveau: "Beth" },
+{ categorie: "Education", francais: "Gomme", hebreu: "מחק", niveau: "Beth" },
+{ categorie: "Education", francais: "Règle", hebreu: "סרגל", niveau: "Beth" },
+{ categorie: "Education", francais: "Trousse", hebreu: "קלמר", niveau: "Beth" },
+{ categorie: "Education", francais: "Ciseaux", hebreu: "מספריים", niveau: "Beth" },
+{ categorie: "Education", francais: "Matériel / Équipement", hebreu: "ציוד", niveau: "Beth" },
+{ categorie: "Education", francais: "Erreur / Faute", hebreu: "טעות", niveau: "Beth" },
+{ categorie: "Education", francais: "Correction", hebreu: "תיקון", niveau: "Beth" },
+{ categorie: "Education", francais: "Annonce / Information", hebreu: "הודעה", niveau: "Beth" },
+{ categorie: "Education", francais: "Texte", hebreu: "טקסט", niveau: "Beth" },
+{ categorie: "Education", francais: "Article", hebreu: "מאמר", niveau: "Beth" },
+{ categorie: "Education", francais: "Règle (de grammaire, de jeu)", hebreu: "כלל", niveau: "Beth" },
+{ categorie: "Education", francais: "Exemple", hebreu: "דוגמה", niveau: "Beth" },
+{ categorie: "Education", francais: "Niveau", hebreu: "רמה", niveau: "Beth" },
+{ categorie: "Education", francais: "Difficulté", hebreu: "קושי", niveau: "Beth" },
+{ categorie: "Education", francais: "Comprendre", hebreu: "להבין", niveau: "Beth" },
+{ categorie: "Education", francais: "Expliquer", hebreu: "להסביר", niveau: "Beth" },
+{ categorie: "Education", francais: "Réussir", hebreu: "להצליח", niveau: "Beth" },
+{ categorie: "Education", francais: "Se souvenir / Mémoriser", hebreu: "לזכור", niveau: "Beth" },
+{ categorie: "Education", francais: "S'entraîner / Pratiquer", hebreu: "לתרגל", niveau: "Beth" },
+{ categorie: "Education", francais: "Examiner / Tester", hebreu: "לבחון", niveau: "Beth" },
+{ categorie: "Education", francais: "Mission", hebreu: "משימה", niveau: "Beth" },
+{ categorie: "Education", francais: "Devoir / Tâche", hebreu: "מטלה", niveau: "Beth" },
+{ categorie: "Education", francais: "Attention", hebreu: "תשומת לב", niveau: "Beth" },
+{ categorie: "Education", francais: "Discipliné(e)", hebreu: "ממושמע / ת", niveau: "Beth" },
+{ categorie: "Education", francais: "Capricieux / Gâté(e)", hebreu: "מפונק / ת", niveau: "Beth" },
+{ categorie: "Education", francais: "Éduqué", hebreu: "מחונך", niveau: "Beth" },
+{ categorie: "Education", francais: "Conseillère (scolaire)", hebreu: "יועצת", niveau: "Beth" },
+{ categorie: "Education", francais: "Documents", hebreu: "מסמכים", niveau: "Beth" },
+{ categorie: "Education", francais: "Avoir de la difficulté", hebreu: "להתקשות", niveau: "Beth" },
+{ categorie: "Education", francais: "Chouchouter / Gâter", hebreu: "לפנק את", niveau: "Beth" },
+{ categorie: "Education", francais: "Compter sur", hebreu: "לסמוך על", niveau: "Beth" },
+{ categorie: "Education", francais: "Se changer / Changer", hebreu: "להשתנות", niveau: "Beth" },
+{ categorie: "Education", francais: "Avoir le temps / Réussir à faire dans les temps", hebreu: "להספיק", niveau: "Beth" },
+{ categorie: "Education", francais: "Mettre en colère", hebreu: "להכעיס את", niveau: "Beth" },
+{ categorie: "Education", francais: "Être puni", hebreu: "להיענש", niveau: "Beth" },
+{ categorie: "Education", francais: "Taper (à l'ordinateur)", hebreu: "להקליד", niveau: "Beth" },
+{ categorie: "Education", francais: "Investir / S'investir", hebreu: "להשקיע", niveau: "Beth" },
+
+{ categorie: "Education", francais: "Enseignement supérieur", hebreu: "השכלה גבוהה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Université", hebreu: "אוניברסיטה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Collège universitaire / École supérieure", hebreu: "מכללה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Licence (Bachelor)", hebreu: "תואר ראשון", niveau: "Guimel" },
+{ categorie: "Education", francais: "Master", hebreu: "תואר שני", niveau: "Guimel" },
+{ categorie: "Education", francais: "Doctorat", hebreu: "תואר שלישי", niveau: "Guimel" },
+{ categorie: "Education", francais: "Baccalauréat", hebreu: "בגרות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Professeur titulaire", hebreu: "פרופסור", niveau: "Guimel" },
+{ categorie: "Education", francais: "Étudiant universitaire", hebreu: "סטודנט", niveau: "Guimel" },
+{ categorie: "Education", francais: "Recherche (scientifique)", hebreu: "מחקר", niveau: "Guimel" },
+{ categorie: "Education", francais: "Chercheur", hebreu: "חוקר", niveau: "Guimel" },
+{ categorie: "Education", francais: "Bourse d'études", hebreu: "מלגה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Inscription", hebreu: "הרשמה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Obligatoire", hebreu: "חובה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Optionnel / Facultatif", hebreu: "רשות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Semestre", hebreu: "סמסטר", niveau: "Guimel" },
+{ categorie: "Education", francais: "Année académique", hebreu: "שנת לימודים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Cours académique", hebreu: "קורס", niveau: "Guimel" },
+{ categorie: "Education", francais: "Laboratoire", hebreu: "מעבדה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Système éducatif", hebreu: "מערכת החינוך", niveau: "Guimel" },
+{ categorie: "Education", francais: "Ministère de l'Éducation", hebreu: "משרד החינוך", niveau: "Guimel" },
+{ categorie: "Education", francais: "Programme scolaire", hebreu: "תכנית לימודים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Production / Résultat attendu", hebreu: "תוצר", niveau: "Guimel" },
+{ categorie: "Education", francais: "Évaluation", hebreu: "הערכה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Réussite / Accomplissement", hebreu: "הישג", niveau: "Guimel" },
+{ categorie: "Education", francais: "Compétence / Aptitude", hebreu: "מיומנות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Connaissance", hebreu: "ידע", niveau: "Guimel" },
+{ categorie: "Education", francais: "Compréhension", hebreu: "הבנה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Analyse", hebreu: "ניתוח", niveau: "Guimel" },
+{ categorie: "Education", francais: "Conclusion", hebreu: "מסקנה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Source (d'information)", hebreu: "מקור", niveau: "Guimel" },
+{ categorie: "Education", francais: "Bibliographie", hebreu: "ביבליוגרפיה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Citation", hebreu: "ציטוט", niveau: "Guimel" },
+{ categorie: "Education", francais: "Discipline", hebreu: "משמעת", niveau: "Guimel" },
+{ categorie: "Education", francais: "Comportement", hebreu: "התנהגות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Éducation spécialisée", hebreu: "חינוך מיוחד", niveau: "Guimel" },
+{ categorie: "Education", francais: "Écoles maternelles", hebreu: "גני ילדים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Collège (12-15 ans)", hebreu: "חטיבת ביניים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Lycée", hebreu: "תיכון", niveau: "Guimel" },
+{ categorie: "Education", francais: "Examen blanc", hebreu: "מבחן מתכונת", niveau: "Guimel" },
+{ categorie: "Education", francais: "Bulletin / Diplôme", hebreu: "תעודה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Mention / Excellence", hebreu: "הצטיינות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Échec", hebreu: "נכשל", niveau: "Guimel" },
+{ categorie: "Education", francais: "Admis / Reçu", hebreu: "עובר", niveau: "Guimel" },
+{ categorie: "Education", francais: "Budget (éducatif)", hebreu: "תקציב", niveau: "Guimel" },
+{ categorie: "Education", francais: "Conseil / Orientation", hebreu: "ייעוץ", niveau: "Guimel" },
+{ categorie: "Education", francais: "Conseiller d'orientation", hebreu: "יועץ חינוכי", niveau: "Guimel" },
+{ categorie: "Education", francais: "Psychologue scolaire", hebreu: "פסיכולוג חינוכי", niveau: "Guimel" },
+{ categorie: "Education", francais: "Formation", hebreu: "הכשרה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Collaboration / Travail d'équipe", hebreu: "שת\"פ (שיתוף פעולה)", niveau: "Guimel" },
+{ categorie: "Education", francais: "Travail d'équipe", hebreu: "עבודת צוות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Groupe de discussion", hebreu: "קבוצת דיון", niveau: "Guimel" },
+{ categorie: "Education", francais: "Débat / Discussion", hebreu: "דיון", niveau: "Guimel" },
+{ categorie: "Education", francais: "Planning", hebreu: "לוח זמנים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Session (d'examen)", hebreu: "מועד", niveau: "Guimel" },
+{ categorie: "Education", francais: "Absence", hebreu: "היעדרות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Justificatif / Autorisation", hebreu: "אישור", niveau: "Guimel" },
+{ categorie: "Education", francais: "Aménagement (d'épreuves)", hebreu: "התאמה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Trouble de l'apprentissage / Dyslexie", hebreu: "לקות למידה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Attention et concentration (TDAH)", hebreu: "קשב וריכוז", niveau: "Guimel" },
+{ categorie: "Education", francais: "Méthode / Pédagogie", hebreu: "שיטה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Pédagogie", hebreu: "פדגוגיה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Approche", hebreu: "גישה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Stratégie", hebreu: "אסטרטגיה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Esprit critique", hebreu: "חשיבה ביקורתית", niveau: "Guimel" },
+{ categorie: "Education", francais: "Académie / Milieu universitaire", hebreu: "אקדמיה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Campus", hebreu: "קמפוס", niveau: "Guimel" },
+{ categorie: "Education", francais: "Corps enseignant / Personnel", hebreu: "סגל", niveau: "Guimel" },
+{ categorie: "Education", francais: "Doyen", hebreu: "דיקן", niveau: "Guimel" },
+{ categorie: "Education", francais: "Recteur", hebreu: "רקטור", niveau: "Guimel" },
+{ categorie: "Education", francais: "Frais de scolarité", hebreu: "שכר לימוד", niveau: "Guimel" },
+{ categorie: "Education", francais: "Analyser / Investiguer", hebreu: "לחקור", niveau: "Guimel" },
+{ categorie: "Education", francais: "S'inscrire", hebreu: "להירשם", niveau: "Guimel" },
+{ categorie: "Education", francais: "Donner un cours / Une conférence", hebreu: "להרצות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Soumettre / Rendre un devoir", hebreu: "להגיש", niveau: "Guimel" },
+{ categorie: "Education", francais: "Traduire", hebreu: "לתרגם", niveau: "Guimel" },
+{ categorie: "Education", francais: "Rédiger / Formuler", hebreu: "לנסח", niveau: "Guimel" },
+{ categorie: "Education", francais: "Se spécialiser", hebreu: "להתמחות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Évaluer", hebreu: "להעריך", niveau: "Guimel" },
+{ categorie: "Education", francais: "Prouver / Démontrer", hebreu: "להוכיח", niveau: "Guimel" },
+{ categorie: "Education", francais: "Développer", hebreu: "לפתח", niveau: "Guimel" },
+{ categorie: "Education", francais: "Assimiler / Intégrer", hebreu: "להפנים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Influer / Impacter", hebreu: "להשפיע", niveau: "Guimel" },
+{ categorie: "Education", francais: "Aspiration", hebreu: "שאיפה", niveau: "Guimel" },
+{ categorie: "Education", francais: "Agressivité", hebreu: "תוקפנות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Violence", hebreu: "אלימות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Physique (pluriel/adjectif)", hebreu: "פיזיים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Autorité", hebreu: "סמכות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Adolescence", hebreu: "גיל ההתבגרות", niveau: "Guimel" },
+{ categorie: "Education", francais: "Image de soi", hebreu: "דימוי עצמי", niveau: "Guimel" },
+{ categorie: "Education", francais: "Maîtrise de soi / Discipline personnelle", hebreu: "משמעת עצמית", niveau: "Guimel" },
+{ categorie: "Education", francais: "Communication", hebreu: "תקשורת", niveau: "Guimel" },
+{ categorie: "Education", francais: "Figurants", hebreu: "ניצבים", niveau: "Guimel" },
+{ categorie: "Education", francais: "Collaborer avec", hebreu: "לשתף פעולה עם", niveau: "Guimel" },
+{ categorie: "Education", francais: "Affronter / Faire face à", hebreu: "להתמודד עם", niveau: "Guimel" },
+{ categorie: "Education", francais: "Exceller", hebreu: "להצטיין", niveau: "Guimel" },
+{ categorie: "Education", francais: "Fixer des limites à", hebreu: "להציב גבולות ל", niveau: "Guimel" },
+{ categorie: "Education", francais: "Ignorer", hebreu: "להתעלם", niveau: "Guimel" },
+{ categorie: "Education", francais: "Alléger", hebreu: "להקל", niveau: "Guimel" },
+
+
+//Shopping
+{ categorie: "Shopping", francais: "Magasin", hebreu: "חנות", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Achat", hebreu: "קנייה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Prix", hebreu: "מחיר", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Argent", hebreu: "כסף", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Espèces / Liquide", hebreu: "מזומן", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Carte de crédit", hebreu: "כרטיס אשראי", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Caisse", hebreu: "קופה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Vendeur / Vendeuse", hebreu: "מוכר / מוכרת", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Client / Cliente", hebreu: "לקוח / לקוחה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Chemise / T-shirt", hebreu: "חולצה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Pantalon", hebreu: "מכנסיים", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Jupe", hebreu: "חצאית", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Robe", hebreu: "שמלה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Chaussures", hebreu: "נעליים", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Taille (vêtement)", hebreu: "מידה", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Sac (en plastique/papier)", hebreu: "שקית", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Sac à main / Sac", hebreu: "תיק", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Or", hebreu: "זהב", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Argent (métal)", hebreu: "כסף (מתכת)", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Bon marché / Pas cher", hebreu: "זול", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Cher", hebreu: "יקר", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Neuf / Nouveau", hebreu: "חדש", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Vieux / Ancien", hebreu: "ישן", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Acheter", hebreu: "לקנות", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Vendre", hebreu: "למכור", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Payer", hebreu: "לשלם", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Porter / Mettre (vêtement)", hebreu: "ללבוש", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Chausser (chaussures)", hebreu: "לנעול", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Montrer / Afficher", hebreu: "להראות", niveau: "Aleph" },
+{ categorie: "Shopping", francais: "Choisir", hebreu: "לבחור", niveau: "Aleph" },
+
+{ categorie: "Shopping", francais: "Centre commercial", hebreu: "קניון", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Vitrine", hebreu: "חלון ראווה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Cabine d'essayage", hebreu: "תא מדידה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Bon d'échange", hebreu: "פתק החלפה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Reçu / Ticket de caisse", hebreu: "קבלה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Remise / Réduction", hebreu: "הנחה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Promotion / Solde", hebreu: "מבצע", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Pourcentage", hebreu: "אחוז", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Taille / Dimension", hebreu: "גודל", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Monnaie rendue / Rendu", hebreu: "עודף", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Versements / Mensualités", hebreu: "תשלומים", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Stock", hebreu: "מלאי", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Qualité", hebreu: "איכות", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Marque", hebreu: "מותג", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Modèle", hebreu: "דגם", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Couleur", hebreu: "צבע", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Manteau", hebreu: "מעיל", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Ceinture", hebreu: "חגורה", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Chapeau / Casquette", hebreu: "כובע", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Chaussettes", hebreu: "גרביים", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Lunettes de soleil", hebreu: "משקפי שמש", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Bijoux", hebreu: "תכשיטים", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Mesurer / Essayer", hebreu: "למדוד", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Essayer / Tenter", hebreu: "לנסות", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Commander", hebreu: "להזמין", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Échanger", hebreu: "להחליף", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Retourner / Rendre", hebreu: "להחזיר", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Recommander", hebreu: "להמליץ", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Détailler / Décrire", hebreu: "לתאר", niveau: "Beth" },
+{ categorie: "Shopping", francais: "Coudre / Couturière", hebreu: "לתפור / תופרת", niveau: "Beth" },
+
+{ categorie: "Shopping", francais: "Société / Culture de consommation", hebreu: "תרבות הצריכה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Consommation", hebreu: "צרכנות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Consommateur", hebreu: "צרכן", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Achats en ligne", hebreu: "קניות ברשת", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Livraison", hebreu: "משלוח", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Frais de port / Livraison", hebreu: "דמי משלוח", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Société de coursiers / Livraison", hebreu: "חברת שליחויות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Suivi de colis", hebreu: "מעקב משלוחים", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Remboursement", hebreu: "החזר כספי", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Politique de retour", hebreu: "מדיניות החזרות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Garantie", hebreu: "אחריות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Certificat de garantie", hebreu: "תעודת אחריות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Fournisseur", hebreu: "ספק", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Importateur", hebreu: "יבואן", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Exportateur", hebreu: "יצואן", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Marchandise", hebreu: "סחורה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Magasin de seconde main", hebreu: "חנות יד שנייה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Épicerie de nuit / Convenience store", hebreu: "חנות נוחות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Supermarché", hebreu: "סופרמרקט", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Caddie / Panier d'achat", hebreu: "עגלת קניות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Panier (d'achat)", hebreu: "סל קניות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Chèque-cadeau / Bon d'achat", hebreu: "תו קנייה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Carte de fidélité", hebreu: "כרטיס מועדון", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Membre du club privilège", hebreu: "חבר מועדון", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Programme de fidélité", hebreu: "מועדון לקוחות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Avantage / Privilège", hebreu: "הטבה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Points de fidélité", hebreu: "נקודות זכות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Débit / Facturation", hebreu: "חיוב", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Crédit / Avoir", hebreu: "זיכוי", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Facture", hebreu: "חשבונית", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Commission / Frais bancaires", hebreu: "עמלה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Budget", hebreu: "תקציב", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Dépassement de budget", hebreu: "חריגה מהתקציב", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Dépense", hebreu: "הוצאה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Revenu", hebreu: "הכנסה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Comparaison de prix", hebreu: "השוואת מחירים", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Saison (de mode)", hebreu: "עונה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Fin de saison / Soldes", hebreu: "סוף עונה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Collection", hebreu: "קולקציה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Mode", hebreu: "אופנה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Coupe (d'un vêtement)", hebreu: "גזרה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Tissu / Étoffe", hebreu: "בד", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Coton", hebreu: "כותנה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Laine", hebreu: "צמר", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Soie", hebreu: "משי", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Cuir", hebreu: "עור", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Lin", hebreu: "פשתן", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Synthétique", hebreu: "סינתטי", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Résistant / Durable", hebreu: "עמיד", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Délicat / Fragile", hebreu: "עדין", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Lessive / Linge", hebreu: "כביסה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Instructions de lavage", hebreu: "הוראות כביסה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Lingerie / Sous-vêtements", hebreu: "הלבשה תחתונה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Vêtements de sport", hebreu: "בגדי ספורט", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Tenues de soirée", hebreu: "בגדי ערב", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Costume / Tailleur", hebreu: "חליפה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Cravate", hebreu: "עניבה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Gants", hebreu: "כפפות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Écharpe", hebreu: "צעיף", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Bottes", hebreu: "מגפיים", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Sandales", hebreu: "סנדלים", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Chaussons", hebreu: "נעלי בית", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Service client", hebreu: "שירות לקוחות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Réclamation / Plainte", hebreu: "תלונה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Expérience d'achat", hebreu: "חווית קנייה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Disponibilité", hebreu: "זמינות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Commande sur mesure", hebreu: "הזמנה מותאמת אישית", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Emballage", hebreu: "אריזה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Papier cadeau", hebreu: "עטיפת מתנה", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Code promo", hebreu: "קוד קופון", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Scan de code-barres", hebreu: "סריקת ברקוד", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Défectueux / Abîmé", hebreu: "פגום", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Défaut / Imperfection", hebreu: "פגם", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Dépenser de l'argent", hebreu: "להוציא כסף", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Économiser", hebreu: "לחסוך", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Dépasser (un budget)", hebreu: "לחרוג", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Peser / Soupérer", hebreu: "לשקול", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Hésiter", hebreu: "להתלבט", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Assortir / Convenir", hebreu: "להתאים", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "S'engager", hebreu: "להתחייב", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Annuler", hebreu: "לבטל", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Composer / Dédommager", hebreu: "לפצות", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Fournir / Livrer", hebreu: "לספק", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Augmenter le prix", hebreu: "להעלות מחיר", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Baiser le prix", hebreu: "להוזיל", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Négocier / Marchander", hebreu: "להתמקח", niveau: "Guimel" },
+{ categorie: "Shopping", francais: "Être impressionné / Évaluer", hebreu: "להתרשם", niveau: "Guimel" },
+
+//Banque 
+{ categorie: "Banque", francais: "Banque", hebreu: "בנק", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Argent", hebreu: "כסף", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Compte bancaire", hebreu: "חשבון בנק", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Distributeur automatique", hebreu: "כספומט", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Carte de crédit", hebreu: "כרטיס אשראי", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Code secret", hebreu: "קוד סודי", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Espèces / Liquide", hebreu: "מזומן", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Employé(e) de banque / Guichetier", hebreu: "פקיד / פקידה", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Queue / Rang", hebreu: "תור", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Formulaire", hebreu: "טופס", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Signature", hebreu: "חתימה", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Relevé de compte", hebreu: "דף חשבון", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Compte courant", hebreu: "עו״ש (עובר ושוב)", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Solde", hebreu: "יתרה", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Dette", hebreu: "חוב", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Cadeau / Prime", hebreu: "מתנה", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Portefeuille", hebreu: "ארנק", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Payer", hebreu: "לשלם", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Signer", hebreu: "לחתום", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Retirer / Tirer (de l'argent)", hebreu: "למשוך", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Déposer (de l'argent)", hebreu: "להפקיד", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Transférer / Virer", hebreu: "להעביר", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Économiser / Épargner", hebreu: "לחסוך", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Dépenser / Gaspiller", hebreu: "לבזבז", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Recevoir", hebreu: "לקבל", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Donner", hebreu: "לתת", niveau: "Aleph" },
+{ categorie: "Banque", francais: "Vérifier", hebreu: "לבדוק", niveau: "Aleph" },
+
+{ categorie: "Banque", francais: "Agence", hebreu: "סניף", niveau: "Beth" },
+{ categorie: "Banque", francais: "Chéquier", hebreu: "פנקס צ'קים", niveau: "Beth" },
+{ categorie: "Banque", francais: "Prélèvement automatique", hebreu: "הוראת קבע", niveau: "Beth" },
+{ categorie: "Banque", francais: "Prêt / Emprunt", hebreu: "הלוואה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Plan d'épargne", hebreu: "תכנית חיסכון", niveau: "Beth" },
+{ categorie: "Banque", francais: "Solde créditeur", hebreu: "יתרת זכות", niveau: "Beth" },
+{ categorie: "Banque", francais: "Solde débiteur", hebreu: "יתרת חובה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Intérêt", hebreu: "ריבית", niveau: "Beth" },
+{ categorie: "Banque", francais: "Commission / Frais", hebreu: "עמלה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Budget", hebreu: "תקציב", niveau: "Beth" },
+{ categorie: "Banque", francais: "Échéance / Période", hebreu: "תקופה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Virement bancaire", hebreu: "העברה בנקאית", niveau: "Beth" },
+{ categorie: "Banque", francais: "Directeur d'agence", hebreu: "מנהל סניף", niveau: "Beth" },
+{ categorie: "Banque", francais: "Numéro de compte", hebreu: "מספר חשבון", niveau: "Beth" },
+{ categorie: "Banque", francais: "Numéro d'agence", hebreu: "מספר סניף", niveau: "Beth" },
+{ categorie: "Banque", francais: "Devise étrangère / Monnaie", hebreu: "מטבע חוץ (מט״ח)", niveau: "Beth" },
+{ categorie: "Banque", francais: "Paiement / Mensualité", hebreu: "תשלום", niveau: "Beth" },
+{ categorie: "Banque", francais: "Crédit", hebreu: "אשראי", niveau: "Beth" },
+{ categorie: "Banque", francais: "Autorisation de découvert / Plafond", hebreu: "מסגרת אשראי", niveau: "Beth" },
+{ categorie: "Banque", francais: "Dépassement", hebreu: "חריגה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Garant / Garante", hebreu: "ערב / ערבה", niveau: "Beth" },
+{ categorie: "Banque", francais: "Garanties / Sûretés", hebreu: "בטחונות", niveau: "Beth" },
+{ categorie: "Banque", francais: "Annuler", hebreu: "לבטל", niveau: "Beth" },
+{ categorie: "Banque", francais: "Confirmer / Valider", hebreu: "לאשר", niveau: "Beth" },
+{ categorie: "Banque", francais: "Appeler / Contacter", hebreu: "להתקשר", niveau: "Beth" },
+{ categorie: "Banque", francais: "Mettre à jour", hebreu: "לעדכן", niveau: "Beth" },
+{ categorie: "Banque", francais: "S'assurer / Vérifier", hebreu: "לוודא", niveau: "Beth" },
+{ categorie: "Banque", francais: "Prêter", hebreu: "להלוות", niveau: "Beth" },
+{ categorie: "Banque", francais: "Emprunter", hebreu: "לוות", niveau: "Beth" },
+{ categorie: "Banque", francais: "Rembourser / Rendre", hebreu: "להחזיר", niveau: "Beth" },
+
+{ categorie: "Banque", francais: "Prêt immobilier / Hypothèque", hebreu: "משכנתא", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Investissement", hebreu: "השקעה", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Investisseur", hebreu: "משקיע", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Actions (boursières)", hebreu: "מניות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Obligations", hebreu: "איגרות חוב (אג״ח)", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Bourse", hebreu: "בורסה", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Portefeuille d'investissements", hebreu: "תיק השקעות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Fonds de pension / Retraite", hebreu: "קרן פנסיה", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Fonds de formation / Épargne libre", hebreu: "קרן השתלמות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Caisse de prévoyance", hebreu: "קופת גמל", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Fonds commun de placement (FCP)", hebreu: "קרן נאמנות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Rendement / Profitabilité", hebreu: "תשואה", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Profit / Gain", hebreu: "רווח", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Perte", hebreu: "הפסד", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Risque", hebreu: "סיכון", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Dévaluation", hebreu: "פיחות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Réévaluation", hebreu: "ייפוף", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Taux de change", hebreu: "שער חליפין", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Taux officiel (représentatif)", hebreu: "שער יציג", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Liquidité", hebreu: "נזילות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Actifs / Patrimoine", hebreu: "נכסים", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Engagements / Passifs", hebreu: "התחייבויות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Bilan comptable", hebreu: "מאזן", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Comptes bloqués", hebreu: "חשבונות מוקפאים", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Garantie bancaire", hebreu: "ערבות בנקאית", niveau: "Guimel"},
+{ categorie: "Banque", francais: "Frais de gestion", hebreu: "עמלת ניהול", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Remboursement anticipé", hebreu: "פירעון מוקדם", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Compte joint", hebreu: "חשבון משותף", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Procuration", hebreu: "ייפוי כוח", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Bénéficiaire", hebreu: "מוטב", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Banque en ligne / Digitale", hebreu: "בנקאות דיגיטלית", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Application bancaire", hebreu: "אפליקציה בנקאית", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Identification biométrique", hebreu: "זיהוי ביומטרי", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Sécurité des données", hebreu: "אבטחת מידע", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Fraude", hebreu: "הונאה", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Chèque annulé", hebreu: "צ'ק מבוטל", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Chèque différé", hebreu: "צ'ק דחוי", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Négocier / Échanger (en bourse)", hebreu: "לסחור", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Investir", hebreu: "להשקיע", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Émettre (des actions, cartes)", hebreu: "להנפיק", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Emprunter / Contracter un prêt", hebreu: "ללוות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Prêter", hebreu: "להלוות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Rembourser (une dette)", hebreu: "לפרוע", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Résoudre (un litige)", hebreu: "לפתור", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Dédommager / Indemniser", hebreu: "לפצות", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Évaluer (un risque/actif)", hebreu: "להעריך", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Conseiller", hebreu: "לייעץ", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Gérer / Administrer", hebreu: "לנהל", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Convertir (une devise)", hebreu: "להמיר", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Compenser / Déduire", hebreu: "לקזז", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Dépasser (une limite)", hebreu: "לחרוג", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Garantir / Assurer", hebreu: "להבטיח", niveau: "Guimel" },
+{ categorie: "Banque", francais: "Réaliser / Liquider (un actif)", hebreu: "לממש", niveau: "Guimel" },
+{ categorie: "Banque", francais: "S'engager financièrement", hebreu: "להתחייב", niveau: "Guimel" },
+
+//Sante
+{ categorie: "Santé", francais: "Médecin / Docteur", hebreu: "רופא / רופאה", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Malade", hebreu: "חולה", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Mal / Douleur", hebreu: "כאב", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Fièvre", hebreu: "חום", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Thermomètre", hebreu: "מדחום", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Rhume / Écoulement nasal", hebreu: "נזלת", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Médicament", hebreu: "תרופה", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Pharmacie", hebreu: "בית מרקחת", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Infirmière", hebreu: "אחות", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Patient", hebreu: "מטופל", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Rendez-vous / Rang", hebreu: "תור", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Pâle", hebreu: "חיוור", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Enrhumé", hebreu: "מצונן", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Respirer", hebreu: "לנשום", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Tousser", hebreu: "להשתעל", niveau: "Aleph" },
+{ categorie: "Santé", francais: "S'allonger", hebreu: "לשכב", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Attraper froid", hebreu: "להצטנן", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Souffrir", hebreu: "לסבול", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Dépenser (énergie / temps)", hebreu: "לבזבז", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Souhaiter", hebreu: "לאחל", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Conseil", hebreu: "עצה", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Bon rétablissement", hebreu: "החלמה מהירה", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Je suis désolé pour / si", hebreu: "צר לי על / אם", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Avoir besoin de", hebreu: "לזקוק", niveau: "Aleph" },
+{ categorie: "Santé", francais: "Se sentir / Ressentir", hebreu: "להרגיש", niveau: "Aleph" },
+
+{ categorie: "Santé", francais: "Grippe", hebreu: "שפעת", niveau: "Beth" },
+{ categorie: "Santé", francais: "Nausée", hebreu: "בחילה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Vertige", hebreu: "סחרחורת", niveau: "Beth" },
+{ categorie: "Santé", francais: "Tension artérielle", hebreu: "לחץ דם", niveau: "Beth" },
+{ categorie: "Santé", francais: "Ordonnance", hebreu: "מרשם", niveau: "Beth" },
+{ categorie: "Santé", francais: "Piqûre / Injection", hebreu: "זריקה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Radio / Radiographie", hebreu: "צילום", niveau: "Beth" },
+{ categorie: "Santé", francais: "Vaccin", hebreu: "חיסון", niveau: "Beth" },
+{ categorie: "Santé", francais: "Blessure / Plaie", hebreu: "פציעה / פצע", niveau: "Beth" },
+{ categorie: "Santé", francais: "Blessé / Blessée", hebreu: "פצוע / פגועה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Toux", hebreu: "שיעול", niveau: "Beth" },
+{ categorie: "Santé", francais: "Respiration", hebreu: "נשימה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Clinique de spécialistes", hebreu: "מרפאת מומחים", niveau: "Beth" },
+{ categorie: "Santé", francais: "Assurance maladie", hebreu: "ביטוח בריאות", niveau: "Beth" },
+{ categorie: "Santé", francais: "Service des urgences", hebreu: "חדר מיון", niveau: "Beth" },
+{ categorie: "Santé", francais: "Ambulance", hebreu: "אמבולנס", niveau: "Beth" },
+{ categorie: "Santé", francais: "Piqûre (d'insecte)", hebreu: "עקיצה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Gonflement", hebreu: "התנפחות", niveau: "Beth" },
+{ categorie: "Santé", francais: "Démangeaison", hebreu: "גרד", niveau: "Beth" },
+{ categorie: "Santé", francais: "Éruption cutanée", hebreu: "פריחה", niveau: "Beth" },
+{ categorie: "Santé", francais: "Kit / Trousse", hebreu: "ערכת", niveau: "Beth" },
+{ categorie: "Santé", francais: "Seringue", hebreu: "מזרק", niveau: "Beth" },
+{ categorie: "Santé", francais: "Notice de médicament", hebreu: "עלון תרופות", niveau: "Beth" },
+{ categorie: "Santé", francais: "Analgésique / Antidouleur", hebreu: "משכך כאבים", niveau: "Beth" },
+{ categorie: "Santé", francais: "Se casser", hebreu: "לשבור את", niveau: "Beth" },
+{ categorie: "Santé", francais: "Étaler / Appliquer (une crème)", hebreu: "למרוח", niveau: "Beth" },
+{ categorie: "Santé", francais: "Gonfler", hebreu: "להתנפח", niveau: "Beth" },
+{ categorie: "Santé", francais: "Avaler / Déglutir", hebreu: "לבלוע", niveau: "Beth" },
+{ categorie: "Santé", francais: "Limiter", hebreu: "להגביל", niveau: "Beth" },
+{ categorie: "Santé", francais: "Accompagner", hebreu: "ללוות", niveau: "Beth" },
+
+{ categorie: "Santé", francais: "Diagnostic", hebreu: "אבחנה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Symptômes", hebreu: "תסמינים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Médecin spécialiste", hebreu: "רופא מומחה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Chirurgienne / Chirurgien", hebreu: "מנתח", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Anesthésiste", hebreu: "רופא מרדים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Soins intensifs", hebreu: "טיפול נמרץ", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Soins d'urgence / Médecine d'urgence", hebreu: "רפואת דחופה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Salles d'accouchement", hebreu: "חדרי לידה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "État d'urgence", hebreu: "מצב חירום", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Opération / Intervention chirurgicale", hebreu: "ניתוח", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Analyses / Examens approfondis", hebreu: "ניתוחים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Inflammation", hebreu: "דלקת", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Pneumonie", hebreu: "דלקת ריאות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Fracture", hebreu: "שבר", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Cancer", hebreu: "סרטן", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Grossesse / Enceinte", hebreu: "הריון", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Déshydratation", hebreu: "התייבשות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Surpoids", hebreu: "עודף משקל", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Obésité", hebreu: "השמנה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Dépendance", hebreu: "תלות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Accro / Dépendant", hebreu: "מכור", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Addictif", hebreu: "ממכר", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Dommage / Dégât", hebreu: "נזק", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Risque", hebreu: "סיכון", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Rayonnement / Radiation", hebreu: "קרינה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Sensibilité / Sensible", hebreu: "רגישות / רגיש", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Membres (bras et jambes)", hebreu: "גפיים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Déglutition", hebreu: "בליעה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Sensibilisation / Explication médicale", hebreu: "הסברה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Suivi (médical)", hebreu: "מעקב", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Hypothèses (médicales)", hebreu: "הנחות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Évolution (d'une maladie)", hebreu: "התפתחות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Protection", hebreu: "הגנה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Image de soi", hebreu: "דימוי עצמי", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Autorité (médicale/parentale)", hebreu: "סמכות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Communication", hebreu: "תקשורת", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Adolescence", hebreu: "גיל ההתבגרות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Discipline personnelle", hebreu: "משמעת עצמית", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Hospitaliser", hebreu: "לאשפז", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Être hospitalisé", hebreu: "להאשפז", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Diagnostiquer", hebreu: "לאבחן", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Analyser / Opérer", hebreu: "לנתח", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Protéger", hebreu: "להגן", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Mettre en danger", hebreu: "לסכן", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Provoquer / Casser", hebreu: "לגרום", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Se désintoxiquer / S'affranchir d'une addiction", hebreu: "להיגמל", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Survivre", hebreu: "לשרוד", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Éliminer / Anéantir", hebreu: "לחסל", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Fumer", hebreu: "לעשן", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Être gêné / Avoir honte", hebreu: "להתבייש", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Affronter / Faire face à", hebreu: "להתמודד עם", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Étendre les bras", hebreu: "לפרוש ידיים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Aux drogues", hebreu: "לסמים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Agressivité", hebreu: "תוקפנות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Violence", hebreu: "אלימות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Attention", hebreu: "תשומת לב", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Tâche / Devoir médical", hebreu: "מטלה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Mission", hebreu: "משימה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Aspiration", hebreu: "שאיפה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Recherche (médicale)", hebreu: "מחקר", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Chercheur", hebreu: "חוקר", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Laboratoire", hebreu: "מעבדה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Source / Origine", hebreu: "מקור", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Conclusion", hebreu: "מסקנה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Analyse de données", hebreu: "ניתוח נתונים", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Compétence / Aptitude", hebreu: "מיומנות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Connaissance", hebreu: "ידע", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Compréhension", hebreu: "הבנה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Évaluation", hebreu: "הערכה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Résultat / Produit", hebreu: "תוצר", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Méthode / Procédé", hebreu: "שיטה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Stratégie", hebreu: "אסטרטגיה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Approche", hebreu: "גישה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Esprit critique", hebreu: "חשיבה ביקורתית", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Créativité", hebreu: "יצירתיות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Justificatif / Autorisation", hebreu: "אישור", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Absence", hebreu: "היעדרות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Aménagement / Adaptation", hebreu: "התאמה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Trouble / Handicap", hebreu: "לקות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Attention et concentration", hebreu: "קשב וריכוז", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Certificat / Attestation", hebreu: "תעודה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Excellence", hebreu: "הצטיינות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Conseil / Orientation", hebreu: "ייעוץ", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Conseiller", hebreu: "יועץ", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Psychologue", hebreu: "פסיכולוג", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Formation", hebreu: "הכשרה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Spécialisation", hebreu: "התמחות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Collaboration", hebreu: "שיתוף פעולה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Travail d'équipe", hebreu: "עבודת צוות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Discussion / Débat", hebreu: "דיון", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Recours / Appel", hebreu: "ערעור", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Comportement", hebreu: "התנהגות", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Budget (santé)", hebreu: "תקציב", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Investissement", hebreu: "השקעה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Développement", hebreu: "פיתוח", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Assimilation", hebreu: "הפנמה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Impact / Influence", hebreu: "השפעה", niveau: "Guimel" },
+{ categorie: "Santé", francais: "Conséquence / Résultat", hebreu: "תוצאה", niveau: "Guimel" },
+
+//Verbes 
+{ categorie: "Verbes", francais: "Prendre", hebreu: "לקחת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Chercher", hebreu: "לחפש", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Vérifier", hebreu: "לבדוק", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Retenir / Se souvenir", hebreu: "לזכור", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Oublier", hebreu: "לשכוח", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Attendre", hebreu: "לחכות", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Jeter", hebreu: "לזרוק", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Toucher", hebreu: "לגעת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Rencontrer", hebreu: "לפגוש", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Partir / Quitter", hebreu: "לעזוב", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Aller / Marcher", hebreu: "ללכת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Venir", hebreu: "לבוא", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Courir", hebreu: "לרוץ", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Bouger", hebreu: "לזוז", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Être debout / S'arrêter", hebreu: "לעמוד", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "S'asseoir", hebreu: "לשבת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "S'arrêter / Stopper", hebreu: "לעצור", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Se taire", hebreu: "לשתוק", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Couper", hebreu: "לחתוך", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Faire frire", hebreu: "לטגן", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Éteindre", hebreu: "לכבות", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Demander / Poser une question", hebreu: "לשאול", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Répondre", hebreu: "לענות", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Savoir", hebreu: "לדעת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Vouloir", hebreu: "לרצות", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Être debout / Figurants", hebreu: "ניצב", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Se passer / Arriver", hebreu: "לקרות", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Sortir", hebreu: "לצאת", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Entrer", hebreu: "לכנס", niveau: "Aleph" },
+{ categorie: "Verbes", francais: "Ouvrir", hebreu: "לפתוח", niveau: "Aleph" },
+
+{ categorie: "Verbes", francais: "Apporter / Amener", hebreu: "להביא", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Continuer", hebreu: "להמשיך", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Décider", hebreu: "להחליט", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Promettre", hebreu: "להבטיח", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Expliquer", hebreu: "להסביר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Proposer", hebreu: "להציע", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Déranger", hebreu: "להפריע", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Écouter", hebreu: "להקשיב", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Être d'accord", hebreu: "להסכים", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Inviter / Commander", hebreu: "להזמין", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Retourner / Rendre", hebreu: "להחזיר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Changer / Échanger", hebreu: "להחליף", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Arrêter / Cesser", hebreu: "להפסיק", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Énerver", hebreu: "להרגיז", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Réduire / Diminuer", hebreu: "להקטין", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Rester", hebreu: "להישאר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "S'endormir", hebreu: "להירדם", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se détendre / Se calmer", hebreu: "להירגע", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Faire attention", hebreu: "להיזהר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se retrouver avec", hebreu: "להיפגש עם", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se débrouiller", hebreu: "להסתדר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "S'habituer", hebreu: "להתרגל", niveau: "Beth" },
+{ categorie: "Verbes", francais: "S'énerver", hebreu: "להתרגז", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se réveiller", hebreu: "להתעורר", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se préparer", hebreu: "להתכונן", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Aller de l'avant / Avancer", hebreu: "להתקדם", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Se comporter", hebreu: "להתנהג", niveau: "Beth" },
+{ categorie: "Verbes", francais: "S'intéresser à", hebreu: "להתעניין", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Participier", hebreu: "להשתתף", niveau: "Beth" },
+{ categorie: "Verbes", francais: "Rejoindre", hebreu: "להצטרף", niveau: "Beth" },
+
+{ categorie: "Verbes", francais: "Utiliser", hebreu: "להשתמש", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Regarder / Observer", hebreu: "להסתכל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'adapter", hebreu: "להסתגל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se plaindre", hebreu: "להתלונן", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Tenir compte de", hebreu: "להתחשב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se concentrer", hebreu: "להתרכז", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Hésiter", hebreu: "להתלבט", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se revoir", hebreu: "להתראות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se rassembler", hebreu: "להתאסף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'attarder / Être retardé", hebreu: "להתעכב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Faire face / Pour y faire face", hebreu: "להתמודד", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'adapter / Correspondre", hebreu: "להתאים", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Influencer", hebreu: "להשפיע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Investir / S'investir", hebreu: "להשקיע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Imprimer", hebreu: "להדפיס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Déclarer / Annoncer", hebreu: "להכריז", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Être rigoureux / Veiller", hebreu: "להקפיד", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Commémorer", hebreu: "להנציח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Accuser", hebreu: "להאשים", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Séparer", hebreu: "להפריד", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Comparer", hebreu: "להשוות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Mûrir", hebreu: "להבשיל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Contourner", hebreu: "להעקף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Manquer / Rater", hebreu: "להחמיץ", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se blesser", hebreu: "להיפצע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Être lavé", hebreu: "להיכבס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se disperser", hebreu: "להיפזר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Améliorer", hebreu: "לשפר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Réaliser / Exécuter", hebreu: "לבצע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Établir / Fonder", hebreu: "לבסס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Répartir / Disperser", hebreu: "לפזר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Développer", hebreu: "לפתח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Importer", hebreu: "לייבא", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Exporter", hebreu: "לייצא", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Coordonner", hebreu: "לתאם", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Deviner", hebreu: "לנחש", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Imaginer", hebreu: "לדמיין", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Explorer / Enquêter", hebreu: "לחקור", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Remettre / Transmettre", hebreu: "למסור", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Contrôler / Maîtriser", hebreu: "לשלוט", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Juger / Discuter de", hebreu: "לדון", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Regarder / S'attendre à", hebreu: "לצפות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se tourner vers / Evacuer", hebreu: "לפנות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Clarifier / Se renseigner", hebreu: "לברר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Brûler", hebreu: "לשרוף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Détruire", hebreu: "להרוס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'occuper de / Soigner", hebreu: "לטפל ב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Creuser", hebreu: "לחפור", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Respecter", hebreu: "לכבד", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Heurter / Blesser", hebreu: "לפגוע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Fixer / Immobiliser", hebreu: "לקבע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Éviter / Empêcher", hebreu: "למנוע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Aspirer / Ambitionner", hebreu: "לשאוף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Respecter / Réaliser (promesse)", hebreu: "לקיים", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Passer / S'écouler (temps)", hebreu: "לחלוף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Mordre", hebreu: "לנשוך", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Peser / Envisager", hebreu: "לשקול", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Exiger", hebreu: "לדרוש", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Soupçonner", hebreu: "לחשוד", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Saisir / Attraper", hebreu: "לתפוס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Convaincre", hebreu: "לשכנע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Extraire / Secourir", hebreu: "לחלץ", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Grogner", hebreu: "לגרוח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Rejeter / Reporter", hebreu: "לדחות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'éloigner", hebreu: "להתרחק", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'enfuir", hebreu: "לברוח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Refuser", hebreu: "לסרב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Agir", hebreu: "לפעול", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'appliquer (loi, date)", hebreu: "לחול", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Entrer en vigueur / Attaquer", hebreu: "לתקוף", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Chuchoter", hebreu: "ללחוש", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Aligner / S'aligner", hebreu: "לישר קו", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'organiser / Se préparer", hebreu: "נערך", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Être obligé / Engagé", hebreu: "מחויב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Prouver", hebreu: "להוכיח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Imposer / Jeter", hebreu: "להטיל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Être impressionné", hebreu: "להתרשם", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Se référer à / Traiter", hebreu: "להתייחס", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "S'émerveiller", hebreu: "להתפעל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Forcer / Obliger", hebreu: "להכריח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Recommander", hebreu: "להמליץ", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Avertir", hebreu: "להזהיר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Remercier / Avouer", hebreu: "להודות", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Nier", hebreu: "להכחיש", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Traduire", hebreu: "לתרגם", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Annoter / Inscrire", hebreu: "לרשום", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Rédiger / Formuler", hebreu: "לנסח", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Résoudre", hebreu: "לפתור", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Pratiquer / S'entraîner", hebreu: "לתרגל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Entamer", hebreu: "לפתוח ב", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Décrire", hebreu: "לתאר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Exploiter / Profiter de", hebreu: "לנצל", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Fournir", hebreu: "לספק", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Exprimer", hebreu: "להביע", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Assimiler / Intégrer", hebreu: "להפנים", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Définir", hebreu: "להגדיר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Évaluer / Apprécier", hebreu: "להעריך", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Embarrasser", hebreu: "להביך", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Cacher", hebreu: "להסתיר", niveau: "Guimel" },
+{ categorie: "Verbes", francais: "Surprendre", hebreu: "להפתיע", niveau: "Guimel" },
+
+//Adjectifs 
+{ categorie: "Adjectifs", francais: "Grand", hebreu: "גדול", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Petit", hebreu: "קטן", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Bon", hebreu: "טוב", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Mauvais", hebreu: "רע", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Beau / Joli", hebreu: "יפה", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Nouveau / Neuf", hebreu: "חדש", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Vieux / Ancien (objet)", hebreu: "ישן", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Âgé / Vieux (personne)", hebreu: "זקן", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Jeune", hebreu: "צעיר", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Chaud", hebreu: "חם", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Froid", hebreu: "קר", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Délicieux / Bon", hebreu: "טעים", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Sucré", hebreu: "מתוק", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Aigre / Acide", hebreu: "חמוץ", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Salé", hebreu: "מלוח", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Facile / Léger", hebreu: "קל", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Difficile / Dur", hebreu: "קשה", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Rapide", hebreu: "מהיר", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Lent", hebreu: "איטי", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Joyeux", hebreu: "שמח", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Triste", hebreu: "עצבוב", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Fatigué", hebreu: "עייף", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "En bonne santé", hebreu: "בריא", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Malade", hebreu: "חולה", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Blanc", hebreu: "לבן", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Noir", hebreu: "שחור", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Rouge", hebreu: "אדום", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Bleu", hebreu: "כחול", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Jaune", hebreu: "צהוב", niveau: "Aleph" },
+{ categorie: "Adjectifs", francais: "Vert", hebreu: "ירוק", niveau: "Aleph" },
+
+{ categorie: "Adjectifs", francais: "Heureux / Approuvé", hebreu: "מאושר", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Carré", hebreu: "מרובע", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Satisfait", hebreu: "מרוצה", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Cassé / En panne", hebreu: "מקולקל", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Gaspillé", hebreu: "מבוזבז", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Précis / Exact", hebreu: "מדויק", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Cher", hebreu: "יקר", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Bon marché", hebreu: "זול", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Riche", hebreu: "עשיר", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Pauvre", hebreu: "עני", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Fort", hebreu: "חזק", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Faible", hebreu: "חלש", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Long", hebreu: "ארוך", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Court", hebreu: "קצר", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Large", hebreu: "רחב", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Étroit", hebreu: "צר", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Haut / Grand (taille)", hebreu: "גבוה", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Bas / Petit (taille)", hebreu: "נמוך", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Plein", hebreu: "מלא", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Vide", hebreu: "ריק", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Propre", hebreu: "נקי", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Sale", hebreu: "מלוכלך", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Intelligent / Sage", hebreu: "חכם", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Stupide / Bête", hebreu: "טיפש", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Sympathique / Gentil", hebreu: "נחמד", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "En colère", hebreu: "כועס", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Effrayant", hebreu: "מפחיד", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Ouvert", hebreu: "פתוח", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Fermé", hebreu: "סגור", niveau: "Beth" },
+{ categorie: "Adjectifs", francais: "Prêt", hebreu: "מוכן", niveau: "Beth" },
+
+{ categorie: "Adjectifs", francais: "Important", hebreu: "חשוב", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Principal / Essentiel", hebreu: "עיקרי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Secondaire", hebreu: "משני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Possible", hebreu: "אפשרי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Impossible", hebreu: "בלתי אפשרי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Nécessaire / Indispensable", hebreu: "הכרחי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Obligatoire", hebreu: "חובה", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Autorisé / Permis", hebreu: "מותר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Interdit", hebreu: "אסור", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Commun / Partagé", hebreu: "משותף", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Privé / Personnel", hebreu: "פרטי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Public", hebreu: "ציבורי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Local / Régional", hebreu: "מקומות", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "International", hebreu: "בינלאומי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Général", hebreu: "כללי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Spécifique", hebreu: "ספציפי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Spécial / Particulier", hebreu: "מיוחד", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Normal / Habituel", hebreu: "רגיל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Étrange / Bizarre", hebreu: "מוזר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Dangereux", hebreu: "מסוכן", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Sûr / En sécurité", hebreu: "בטוח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Prudent", hebreu: "זהיר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Indépendant / Autonome", hebreu: "עצמאי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Dépendant", hebreu: "תלוי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Responsable", hebreu: "אחראי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Sérieux", hebreu: "רציני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Drôle / Amusant", hebreu: "מצחיק", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Intéressant", hebreu: "מעניין", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Ennuyeux", hebreu: "משעמם", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Talentueux / Doué", hebreu: "מוכשר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Expérimenté", hebreu: "מנוסה", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Professionnel", hebreu: "מקצועי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Créatif", hebreu: "יצירתי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Critique", hebreu: "ביקורתי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Positif", hebreu: "חיובי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Négatif", hebreu: "שלילי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Actif", hebreu: "פעיל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Passif", hebreu: "סביל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Confortable / Pratique", hebreu: "נוח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Efficace", hebreu: "יעיל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Sophistiqué / Élaboré", hebreu: "מתוחכם", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Simple", hebreu: "פשוט", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Compliqué / Complexe", hebreu: "מסובך", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Clair / Évident", hebreu: "ברור", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Confus", hebreu: "מבולבל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Profond", hebreu: "עמוק", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Peu profond / Superficiel", hebreu: "רדוד", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Lourd", hebreu: "כבד", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Délicat / Doux", hebreu: "עדין", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Rigide / Strict", hebreu: "קשיח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Souple / Flexible", hebreu: "גמיש", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Résistant / Durable", hebreu: "עמיד", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Fragile", hebreu: "שביר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Sensible", hebreu: "רגיש", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Cruel", hebreu: "אכזרי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Poli / Courtois", hebreu: "אדיב", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Insolent / Culpable", hebreu: "חוצפן", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Patient", hebreu: "סבלני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Impatient", hebreu: "חסר סבלנות", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Tendu / Anxieux", hebreu: "מתוח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Calme / Serein", hebreu: "רגוע", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Inquiet", hebreu: "דאוג", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Surpris", hebreu: "מופתע", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Déçu", hebreu: "מאוכזב", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Fier", hebreu: "גאה", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Modeste / Humble", hebreu: "צנוע", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Généreux", hebreu: "נדיב", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Avare / Radin", hebreu: "קמצן", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Fidèle / Loyal", hebreu: "נאמן", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Suspect", hebreu: "חשוד", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Fiable / Digne de confiance", hebreu: "אמין", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Actuel / Présent", hebreu: "נוכחי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Précédent", hebreu: "קודם", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Suivant / Prochain", hebreu: "הבא", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Temporaire", hebreu: "זמני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Permanent / Fixe", hebreu: "קבוע", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Moyen", hebreu: "ממוצע", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Supplémentaire", hebreu: "נוסף", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Absolu", hebreu: "מוחלט", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Partiel", hebreu: "חלקאי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Interne", hebreu: "פנימי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Externe", hebreu: "חיצוני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Supérieur / Haut", hebreu: "עליון", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Inférieur / Bas", hebreu: "תחתון", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Central", hebreu: "מרכזי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Latéral", hebreu: "צדדי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Droit / Honnête", hebreu: "ישר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Tordu / Courbé", hebreu: "עקום", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Rond", hebreu: "עגול", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Plat", hebreu: "שטוח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Épais / Dense", hebreu: "סמיך", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Mince / Fin", hebreu: "דק", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Gras / Gros", hebreu: "שמן", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Mince / Maigre", hebreu: "רזה", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Développé", hebreu: "מפותח", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Limité / Restreint", hebreu: "מוגבל", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Remarquable / Notable", hebreu: "ניכר", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Significatif", hebreu: "משמעותי", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Vital / Essentiel", hebreu: "חיוני", niveau: "Guimel" },
+{ categorie: "Adjectifs", francais: "Final / Définitif", hebreu: "סופי", niveau: "Guimel" },
+
+
+//Emotions
+{ categorie: "Emotions", francais: "Joie / Bonheur", hebreu: "שמחה", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Tristesse", hebreu: "עצב", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Colère", hebreu: "כעס", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Peur", hebreu: "פחד", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Amour", hebreu: "אהבה", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Haine", hebreu: "שנאה", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Rire", hebreu: "צחוק", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Pleurs", hebreu: "בכי", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Excitation / Émotion", hebreu: "התרגשות", niveau: "Aleph" },
+{ categorie: "Emotions", francais: "Surprise", hebreu: "הפתעה", niveau: "Aleph" },
+
+{ categorie: "Emotions", francais: "Inquiétude / Souci", hebreu: "דאגה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Jalousie / Envie", hebreu: "קנאה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Honte", hebreu: "בושה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Fierté", hebreu: "גאווה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Déception", hebreu: "אכזבה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Espoir", hebreu: "תקווה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Calme / Sérénité", hebreu: "רוגע", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Tension / Stress", hebreu: "מתח", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Patience", hebreu: "סבלנות", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Souffrance", hebreu: "סבל", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Culpabilité", hebreu: "אשמה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Offense / Vexation", hebreu: "עלבון", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Compassion", hebreu: "חמלה", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Nostalgie / Manque", hebreu: "געגוע", niveau: "Beth" },
+{ categorie: "Emotions", francais: "Terreur / Effroi", hebreu: "אימה", niveau: "Beth" },
+
+{ categorie: "Emotions", francais: "Chaleur humaine / Affection", hebreu: "חמימות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Satisfaction", hebreu: "שביעיות רצון", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Frustration", hebreu: "תסכול", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Anxiété / Angoisse", hebreu: "חרדה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Désespoir", hebreu: "ייאוש", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Solitude", hebreu: "בדידות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Soulagement", hebreu: "הקלה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Embarras / Gêne", hebreu: "מבוכה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Mépris / Dédain", hebreu: "זלזול", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Hostilité / Animosité", hebreu: "איבה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Admiration", hebreu: "הערצה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Tendresse / Affection", hebreu: "חיבה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Dégoût / Répulsion", hebreu: "סלידה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Gratitude", hebreu: "הכרת תודה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Consolation / Réconfort", hebreu: "נחמה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Confusion", hebreu: "בלבול", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Amertume / Rancœur", hebreu: "מרמור", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Fanatisme / Jalousie excessive", hebreu: "קנאות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Tempête d'émotions", hebreu: "סערת רגשות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Quiétude / Paix intérieure", hebreu: "שלווה", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Vide intérieur", hebreu: "ריקנות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Enthousiasme", hebreu: "התלהבות", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Crise émotionnelle", hebreu: "משבר", niveau: "Guimel" },
+{ categorie: "Emotions", francais: "Humiliation", hebreu: "השפלה", niveau: "Guimel" },
+
+//Loisirs 
+{ categorie: "Loisirs", francais: "Piscine", hebreu: "בריכה", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Nager", hebreu: "לשחות", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Musique (pratique d'un instrument)", hebreu: "נגינה", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Prendre des photos", hebreu: "לצלם תמונות", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Sport", hebreu: "ספורט", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Jeu", hebreu: "משחק", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Film", hebreu: "סרט", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Fête", hebreu: "מסיבה", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Promenade / Excursion", hebreu: "טיול", niveau: "Aleph" },
+{ categorie: "Loisirs", francais: "Chanter", hebreu: "לשיר", niveau: "Aleph" },
+
+{ categorie: "Loisirs", francais: "Passe-temps / Hobby", hebreu: "תחביב", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Entraînement", hebreu: "אימון", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Salle de sport", hebreu: "חדר כושר", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Course à pied", hebreu: "ריצה", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Peinture / Dessin", hebreu: "ציור", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Lecture", hebreu: "קריאה", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Cuisine", hebreu: "בישול", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Pâtisserie", hebreu: "אפייה", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Cyclisme / Faire du vélo", hebreu: "רכיבה על אופניים", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Théâtre", hebreu: "תאטרון", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Musée", hebreu: "מוזיאון", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Concert / Spectacle", hebreu: "הופעה", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Zoo", hebreu: "גן חיות", niveau: "Beth" },
+{ categorie: "Loisirs", francais: "Parc d'attractions", hebreu: "לונה פארק", niveau: "Beth" },
+
+{ categorie: "Loisirs", francais: "Temps libre / Loisir", hebreu: "פנאי", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Activité de loisir", hebreu: "פעילות פנאי", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Culture", hebreu: "תרבות", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Art", hebreu: "אומנות", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Création / Œuvre", hebreu: "יצירה", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Sculpture", hebreu: "פיסול", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Littérature", hebreu: "ספרות", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Cinéma (septième art)", hebreu: "קולנוע", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Photographie (art)", hebreu: "צילום", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Danse (artistique)", hebreu: "מחול", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Musicien / Instrumentiste", hebreu: "נגן", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Orchestre", hebreu: "הרכבת תזמורת", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Exposition", hebreu: "תערוכה", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Galerie d'art", hebreu: "גלריה", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Randonnée / Sentier", hebreu: "מסלול הליכה", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Camping", hebreu: "קמפינג", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Escalade", hebreu: "טיפוס הרים", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Jeux de société", hebreu: "משחקי קופסה", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Jeux vidéo", hebreu: "משחקי מחשב", niveau: "Guimel" },
+{ categorie: "Loisirs", francais: "Bénévolat", hebreu: "התנדבות", niveau: "Guimel" },
+
+//Travail
+{ categorie: "Travail", francais: "Salaire", hebreu: "משכורת", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Travail / Emploi", hebreu: "עבודה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Employé / Travailleur", hebreu: "עובד", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Directeur / Manager", hebreu: "מנהל", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Équipe", hebreu: "צוות", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Fonctionnaire / Employé de bureau", hebreu: "פקיד", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Secrétaire", hebreu: "מזכירה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Usine", hebreu: "מפעל", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Bureau", hebreu: "משרד", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Profession / Métier", hebreu: "מקצוע", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Poste / Rôle", hebreu: "תפקיד", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Recherche", hebreu: "חיפוש", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Connaissance", hebreu: "ידע", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Assidu / Travailleur", hebreu: "חרוץ", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Responsable", hebreu: "אחראי", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Sérieux", hebreu: "רציני", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Effort", hebreu: "מאמץ", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Formation / Éducation", hebreu: "השכלה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Jours de congé", hebreu: "ימי חופש", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Gagner (un salaire, de l'argent)", hebreu: "להרוויח", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Aller au travail", hebreu: "ללכת לעבודה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Télétravail", hebreu: "עבודה מהבית", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Travail d'équipe", hebreu: "עבודת צוות", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Poste / Courrier", hebreu: "דואר", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Heures supplémentaires", hebreu: "שעות נוספות", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Grève", hebreu: "שביתה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Lettre", hebreu: "מכתב", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Message / Annonce", hebreu: "הודעה", niveau: "Aleph" },
+{ categorie: "Travail", francais: "Réunion / Rendez-vous", hebreu: "פגישה", niveau: "Aleph" },
+
+{ categorie: "Travail", francais: "Curriculum Vitae (CV)", hebreu: "קורות חיים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Entretien d'embauche", hebreu: "ראיון עבודה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Offre d'emploi", hebreu: "מודעת דרושים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Candidat", hebreu: "מועמד", niveau: "Beth" },
+{ categorie: "Travail", francais: "Recruteur / Interviewer", hebreu: "מראיין", niveau: "Beth" },
+{ categorie: "Travail", francais: "Employeurs", hebreu: "מעסיקים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Compétences", hebreu: "כישורים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Talent", hebreu: "כישרון", niveau: "Beth" },
+{ categorie: "Travail", francais: "Ancienneté", hebreu: "ותק", niveau: "Beth" },
+{ categorie: "Travail", francais: "Emploi / Activité", hebreu: "תעסוקה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Emploi à temps plein", hebreu: "משרה מלאה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Emploi à temps partiel", hebreu: "משרה חלקית", niveau: "Beth" },
+{ categorie: "Travail", francais: "Travail en équipes / par roulement", hebreu: "עבודה במשמרות", niveau: "Beth" },
+{ categorie: "Travail", francais: "Fiche de paie", hebreu: "תלוש משכורת", niveau: "Beth" },
+{ categorie: "Travail", francais: "Conditions salariales", hebreu: "תנאי השכר", niveau: "Beth" },
+{ categorie: "Travail", francais: "Lettre de recommandation", hebreu: "מכתב המלצה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Références / Personnes de recommandation", hebreu: "ממליצים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Chômage", hebreu: "אבטלה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Chômeurs", hebreu: "מובטלים", niveau: "Beth" },
+{ categorie: "Travail", francais: "Allocations chômage", hebreu: "דמי אבטלה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Indépendant / Travailleur autonome", hebreu: "עצמאי", niveau: "Beth" },
+{ categorie: "Travail", francais: "Promotion / Avancement", hebreu: "קידום", niveau: "Beth" },
+{ categorie: "Travail", francais: "Qualification / Formation pratique", hebreu: "הכשרה", niveau: "Beth" },
+{ categorie: "Travail", francais: "Formation continue", hebreu: "השתלמות", niveau: "Beth" },
+{ categorie: "Travail", francais: "Professionnel", hebreu: "מקצועי", niveau: "Beth" },
+{ categorie: "Travail", francais: "Assidu / Appliqué", hebreu: "שקדן", niveau: "Beth" },
+{ categorie: "Travail", francais: "Efficace", hebreu: "יעיל", niveau: "Beth" },
+{ categorie: "Travail", francais: "Faire du bénévolat", hebreu: "להתנדב", niveau: "Beth" },
+{ categorie: "Travail", francais: "Réussir", hebreu: "להצליח", niveau: "Beth" },
+{ categorie: "Travail", francais: "Investir (du temps, des efforts)", hebreu: "להשקיע", niveau: "Beth" },
+
+{ categorie: "Travail", francais: "Processus de recrutement", hebreu: "תהליך הגיוס", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Recruter", hebreu: "לגייס", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Poser sa candidature", hebreu: "להגיש מועמדות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Prétentions salariales", hebreu: "ציפיות שכר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Qualités / Traits de caractère", hebreu: "תכונות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Première impression", hebreu: "רושם ראשוני", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Capacité de persuasion / Éloquence", hebreu: "כושר שכנוע", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Facilité d'expression", hebreu: "כושר ביטוי", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Capacité de gestion / de management", hebreu: "יכולת ניהול", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Relations humaines / interpersonnelles", hebreu: "יחסי אנוש", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Maîtrise", hebreu: "שליטה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Senior / Cadre supérieur", hebreu: "בכיר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Rigoureux / Méticuleux", hebreu: "יסודי", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Reconversion professionnelle", hebreu: "הסבה מקצועית", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Promotion professionnelle", hebreu: "קידום בתפקיד", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Accomplissement / Réalisation", hebreu: "הישג", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Licencier", hebreu: "לפטר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Licencier un employé", hebreu: "לפטר עובד", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Démissionner", hebreu: "להתפוטר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Indemnités / Compensation", hebreu: "פיצויים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Indemnités de licenciement", hebreu: "פיצויי פיטורין", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Fonds de pension", hebreu: "קרן פנסיה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Indemnités de convalescence", hebreu: "דמי הבראה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Frais de vêtements / Prime d'habille", hebreu: "דמי ביגוד", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Subvention / Prime / Bonus", hebreu: "מענק", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Entretien / Maintien automobile", hebreu: "אחזקת רכב", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Économique", hebreu: "כלכלי", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Rapport / Compte-rendu", hebreu: "דיווח", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Référence / Orientation", hebreu: "הפניה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Domaine / Secteur", hebreu: "תחום", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Challenge / Défi", hebreu: "אתגר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Concurrence / Compétition", hebreu: "תחרות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Demandés / Recherchés", hebreu: "מבוקשים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Gérer / Diriger / Manager", hebreu: "לנהל", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Effectuer / Exécuter", hebreu: "לבצע", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Atteindre / Obtenir", hebreu: "להשיג", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Contrat de travail", hebreu: "חוזה עבודה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Convention collective", hebreu: "הסכם קיבוצי", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Négociation", hebreu: "משא ומתן", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Ressources humaines", hebreu: "משאבי אנוש", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Objectifs", hebreu: "יעדים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Planning / Échéancier", hebreu: "לוח זמנים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Date limite / Deadline", hebreu: "מועד אחרון", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Budget", hebreu: "תקציב", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Profit / Bénéfice", hebreu: "רווח", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Perte", hebreu: "הפסד", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Investissement", hebreu: "השקעה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Associé / Partenaire", hebreu: "שותף", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Client", hebreu: "לקוח", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Fournisseur", hebreu: "ספק", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Autorité / Pouvoir", hebreu: "סמכות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Responsabilité", hebreu: "אחריות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Initiative", hebreu: "יוזמה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Innovation", hebreu: "חדשנות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Développement", hebreu: "פיתוח", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Performances", hebreu: "ביצועים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Évaluation des employés", hebreu: "הערכת עובדים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Crise", hebreu: "משבר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Résolution de conflits", hebreu: "פתרון סכסוכים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Réunion de travail", hebreu: "פגישת עבודה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Ordre du jour", hebreu: "סדר יום", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Procès-verbal", hebreu: "פרוטוקול", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Présentation", hebreu: "מצגת", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Projet", hebreu: "פרויקט", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Groupe de réflexion / Think tank", hebreu: "צוות חשיבה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Conseil / Consulting", hebreu: "ייעוץ", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Consultant / Conseiller", hebreu: "יועץ", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Représentant", hebreu: "נציג", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Relations extérieures", hebreu: "קשרי חוץ", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Marketing / Commercialisation", hebreu: "שיווק", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Ventes", hebreu: "מכירות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Publicité", hebreu: "פרסום", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Structure organisationnelle", hebreu: "מבנה ארגוני", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Société / Entreprise", hebreu: "חברה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Corporation / Conglomérat", hebreu: "תאגיד", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Petite entreprise", hebreu: "עסק קטן", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Start-up / Enterprise", hebreu: "מיזם", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Emploi prioritaire (jeunes libérés)", hebreu: "עבודה מועדפת", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Âge de la retraite", hebreu: "גיל פרישה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Départ à la retraite", hebreu: "יציאה לפנסיה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Congé maternité", hebreu: "חופשת לידה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Congé maladie", hebreu: "חופשת מחלה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Accident du travail", hebreu: "תאונת עבודה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Sécurité sociale", hebreu: "ביטוח לאומי", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Impôt sur le revenu", hebreu: "מס הכנסה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Déductions / Prélèvements", hebreu: "ניכויים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Salaire brut", hebreu: "שכר ברוטו", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Salaire net", hebreu: "שכר נטו", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Salaire minimum", hebreu: "שכר מינימום", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Augmentation salariale", hebreu: "העלאה בשכר", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Pourcentages / Commissions", hebreu: "אחוזים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Bonus / Prime de performance", hebreu: "בונוס", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Remboursement de frais", hebreu: "החזר הוצאות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Voiture de fonction", hebreu: "רכב חברה", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Avantages sociaux", hebreu: "תנאים סוציאליים", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Cotisations / Cotisations sociales", hebreu: "הפרשות", niveau: "Guimel" },
+{ categorie: "Travail", francais: "Audience préalable (avant licenciement)", hebreu: "שימוע", niveau: "Guimel" },
+
+//Les lieux de ville 
+{ categorie: "Les lieux de la ville", francais: "Ville", hebreu: "עיר", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Maison / Domicile", hebreu: "בית", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Rue", hebreu: "רחוב", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Magasin", hebreu: "חנות", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Marché", hebreu: "שוק", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Parc", hebreu: "פארק", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "École", hebreu: "בית ספר", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Hôpital", hebreu: "בית חולים", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Restaurant", hebreu: "מסעדה", niveau: "Aleph" },
+{ categorie: "Les lieux de la ville", francais: "Banque", hebreu: "בנק", niveau: "Aleph" },
+
+{ categorie: "Les lieux de la ville", francais: "Centre commercial", hebreu: "מרכז מסחרי", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Mall / Grand centre commercial", hebreu: "קניון", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Place / Rond-point", hebreu: "כיכר", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Quartier", hebreu: "שכונה", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Pharmacie", hebreu: "בית מרקחת", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Bibliothèque", hebreu: "ספרייה", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Station / Arrêt", hebreu: "תחנה", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Café", hebreu: "בית קפה", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Musée", hebreu: "מוזיאון", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Théâtre", hebreu: "תאטרון", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Jardin d'enfants", hebreu: "גן ילדים", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Supermarché", hebreu: "סופרמרקט", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Terrain de sport", hebreu: "מגרש ספורט", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Mairie / Municipalité", hebreu: "עירייה", niveau: "Beth" },
+{ categorie: "Les lieux de la ville", francais: "Synagogue", hebreu: "בית כנסת", niveau: "Beth" },
+
+{ categorie: "Les lieux de la ville", francais: "Centre-ville", hebreu: "מרכז עיר", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Banlieue", hebreu: "פרבר", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Ruelle", hebreu: "סמטה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Rue piétonne", hebreu: "מדרחוב", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Trottoir", hebreu: "מדרכה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Carrefour / Intersection", hebreu: "צומת", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Pont", hebreu: "גשר", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Fontaine", hebreu: "מזרקה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Monument / Mémorial", hebreu: "אנדרטה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Bâtiment public", hebreu: "מבנה public", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Commissariat de police", hebreu: "תחנת משטרה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Caserne de pompiers", hebreu: "תחנת כיבוי אש", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Tribunal", hebreu: "בית משפט", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Bureau de poste", hebreu: "סניף דואר", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Ambassade", hebreu: "שגרירות", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Cimetière", hebreu: "בית עלמין", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Port", hebreu: "נמל", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Promenade (bord de mer)", hebreu: "טיילת", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Zone industrielle", hebreu: "אזור תעשייה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Chantier de construction", hebreu: "אתר בנייה", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Parking", hebreu: "חניון", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Centre communautaire", hebreu: "מתנ\"ס", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Salle de concert", hebreu: "אולם קונצרטים", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Stade", hebreu: "אצטדיון", niveau: "Guimel" },
+{ categorie: "Les lieux de la ville", francais: "Tunnel", hebreu: "מנהרה", niveau: "Guimel" },
+
+
+//Transport 
+
+{ categorie: "Les transports", francais: "Bus", hebreu: "אוטובוס", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Voiture", hebreu: "מכונית / רכב", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Train", hebreu: "רכבת", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Taxi", hebreu: "מונית", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Avion", hebreu: "מטוס", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Vélo", hebreu: "אופניים", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Bateau / Navire", hebreu: "אונייה", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Route / Chemin", hebreu: "דרך", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Trajet / Voyage", hebreu: "נסיעה", niveau: "Aleph" },
+{ categorie: "Les transports", francais: "Chauffeur / Conducteur", hebreu: "נהג", niveau: "Aleph" },
+
+{ categorie: "Les transports", francais: "Arrêt de bus", hebreu: "תחנת אוטובוס", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Gare ferroviaire", hebreu: "תחנת רכבת", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Aéroport", hebreu: "שדה תעופה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Tramway", hebreu: "רכבת קלה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Moto", hebreu: "אופנוע", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Trottinette", hebreu: "קורקינט", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Billet de transport", hebreu: "כרטיס נסיעה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Horaires / Fiche horaire", hebreu: "לוח זמנים", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Circulation / Trafic", hebreu: "תנועה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Embouteillage", hebreu: "פקק תנועה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Stationnement", hebreu: "חנייה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Feu tricolore", hebreu: "רמזור", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Passage piéton", hebreu: "מעבר חצייה", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Passager", hebreu: "נוסע", niveau: "Beth" },
+{ categorie: "Les transports", francais: "Conduire", hebreu: "לנהוג", niveau: "Beth" },
+
+{ categorie: "Les transports", francais: "Métro", hebreu: "רכבת תחתית", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Taxi collectif", hebreu: "מונית שירות", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Camion", hebreu: "משאית", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Ambulance", hebreu: "אמבולנס", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Hélicoptère", hebreu: "מסוק", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Véhicule / Moyen de transport", hebreu: "כלי תחבורה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Transports en commun", hebreu: "תחבורה ציבורית", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Autoroute", hebreu: "כביש מהיר", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Voie / Couloir", hebreu: "נתיב", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Voie ferrée / Rail", hebreu: "מסילה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Panne de moteur", hebreu: "תקלת מנוע", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Accident de la route", hebreu: "תאונת דרכים", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Permis de conduire", hebreu: "רישיון נהיגה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Amende", hebreu: "קנס", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Limitation de vitesse", hebreu: "מהירות מותרת", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Contrôle des passeports", hebreu: "ביקורת דרכונים", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Bagages / Valise", hebreu: "מטען / מזוודה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Décollage", hebreu: "המראה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Atterrissage", hebreu: "נחיתה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Retard", hebreu: "עיכוב / איחור", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Annulation", hebreu: "ביטול", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Changement de voie", hebreu: "מעבר מנתיב לנתיב", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Dépassement", hebreu: "עקיפה", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Carburant / Essence", hebreu: "דלק", niveau: "Guimel" },
+{ categorie: "Les transports", francais: "Trajet urbain / interurbain", hebreu: "נסיעה עירונית / בינעירונית", niveau: "Guimel" },
+
+//Corps 
+{ categorie: "Le corps", francais: "Tête", hebreu: "ראש", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Main / Bras", hebreu: "יד", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Pied / Jambe", hebreu: "רגל", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Œil", hebreu: "עין", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Oreille", hebreu: "אוזן", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Bouche", hebreu: "פה", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Nez", hebreu: "אף", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Ventre", hebreu: "בטן", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Dos", hebreu: "גב", niveau: "Aleph" },
+{ categorie: "Le corps", francais: "Cœur", hebreu: "לב", niveau: "Aleph" },
+
+{ categorie: "Le corps", francais: "Cheveux", hebreu: "שיער", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Visage", hebreu: "פנים", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Dent", hebreu: "שן", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Langue", hebreu: "לשון", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Cou", hebreu: "צוואר", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Épaule", hebreu: "כתף", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Poitrine", hebreu: "חזה", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Doigt", hebreu: "אצבע", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Ongle", hebreu: "ציפורן", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Genou", hebreu: "ברך", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Coude", hebreu: "מרפק", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Gorge", hebreu: "גרון", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Peau", hebreu: "עור", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Front", hebreu: "מצח", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Joue", hebreu: "לחי", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Menton", hebreu: "סנטר", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Sourcil", hebreu: "גבה", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Lèvre", hebreu: "שפה", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Bras", hebreu: "זרוע", niveau: "Beth" },
+{ categorie: "Le corps", francais: "Paume de la main", hebreu: "כף יד", niveau: "Beth" },
+
+{ categorie: "Le corps", francais: "Cerveau", hebreu: "מוח", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Os", hebreu: "עצם", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Muscle", hebreu: "שריר", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Sang", hebreu: "דם", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Veine", hebreu: "ווריד", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Artère", hebreu: "עורק", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Poumon", hebreu: "ריאה", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Foie", hebreu: "כבד", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Rein", hebreu: "כליה", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Estomac", hebreu: "קיבה", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Intestins", hebreu: "מעיים", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Colonne vertébrale", hebreu: "עמוד שדרה", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Côte", hebreu: "צלע", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Crâne", hebreu: "גולגולת", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Articulation", hebreu: "מפרק", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Nerf", hebreu: "עצב", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Tendon", hebreu: "גיד", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Cartilage", hebreu: "סחוס", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Cheville", hebreu: "קרסול", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Poignet", hebreu: "פרק כף היד", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Bassin", hebreu: "אגן", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Narine", hebreu: "נחיר", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Paupière", hebreu: "עפעף", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Cil", hebreu: "ריס", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Menton", hebreu: "סנטר", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Gencives", hebreu: "חניכיים", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Aisselle", hebreu: "בתי שחי", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Nombril", hebreu: "טבור", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Gros orteil", hebreu: "בוהן", niveau: "Guimel" },
+{ categorie: "Le corps", francais: "Plante du pied", hebreu: "כף רגל", niveau: "Guimel" },
+
+//Maison 
+{ categorie: "Maison", francais: "Appartement", hebreu: "דירה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Mur", hebreu: "קיר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Sol / Par terre", hebreu: "רצפה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Miroir", hebreu: "מראה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Four", hebreu: "תנור", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Douche", hebreu: "מקלחת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Clé", hebreu: "מפתח", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Lessive", hebreu: "כביסה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Saleté", hebreu: "לכלוך", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Se laver / Prendre une douche", hebreu: "להתקלח", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Maison", hebreu: "בית", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Chambre / Pièce", hebreu: "חדר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Salon", hebreu: "סלון", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Cuisine", hebreu: "מטבח", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Chambre à coucher", hebreu: "חדר שינה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Salle de bain", hebreu: "חדר רחצה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Toilettes", hebreu: "שירותים", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Balcon", hebreu: "מרפסת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Cour / Jardin", hebreu: "חצר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Entrée", hebreu: "כניסה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Lit", hebreu: "מיטה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Table", hebreu: "שולחן", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Chaise", hebreu: "כיסא", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Canapé", hebreu: "ספה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Armoire / Placard", hebreu: "ארון", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Étagère", hebreu: "מדף", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Tapis", hebreu: "שטיח", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Lampe", hebreu: "מנורה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Porte", hebreu: "דלת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Fenêtre", hebreu: "חלון", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Mur", hebreu: "קיר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Sol", hebreu: "רצפה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Plafond", hebreu: "תקרה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Toit", hebreu: "גג", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Tableau / Photo", hebreu: "תמונה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Plante en pot", hebreu: "עציץ", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Réfrigérateur", hebreu: "מקרר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Four", hebreu: "תנור", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Micro-ondes", hebreu: "מיקרוגל", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Bouilloire", hebreu: "קומקום", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Assiette", hebreu: "צלחת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Verre / Tasse", hebreu: "כוס", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Couteau", hebreu: "סכין", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Fourchette", hebreu: "מזלג", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Cuillère", hebreu: "כף", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Casserole / Faitout", hebreu: "סיר", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Douche", hebreu: "מקלחת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Baignoire", hebreu: "אמבטיה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Évier / Lavabo", hebreu: "כיור", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Savon", hebreu: "סבון", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Serviette", hebreu: "מגבת", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Miroir", hebreu: "מראה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Drap", hebreu: "סדין", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Oreiller / Coussin", hebreu: "כרית", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Couverture", hebreu: "שמיכה", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Poubelle / Ordures", hebreu: "זבל", niveau: "Aleph" },
+{ categorie: "Maison", francais: "Télécommande", hebreu: "שלט", niveau: "Beth" },
+{ categorie: "Maison", francais: "Rideau", hebreu: "וילון", niveau: "Beth" },
+{ categorie: "Maison", francais: "Meubles", hebreu: "רהיטים", niveau: "Beth" },
+{ categorie: "Maison", francais: "Meublé", hebreu: "מרוהט", niveau: "Beth" },
+{ categorie: "Maison", francais: "Voisin", hebreu: "שכן", niveau: "Beth" },
+{ categorie: "Maison", francais: "Colocataire", hebreu: "שותף", niveau: "Beth" },
+{ categorie: "Maison", francais: "Électricité", hebreu: "חשמל", niveau: "Beth" },
+{ categorie: "Maison", francais: "Produits / Appareils électriques", hebreu: "מוצרי חשמל", niveau: "Beth" },
+{ categorie: "Maison", francais: "Louer", hebreu: "לשכור", niveau: "Beth" },
+{ categorie: "Maison", francais: "Sortir la poubelle / Jeter les ordures", hebreu: "לזרוק זבל", niveau: "Beth" },
+{ categorie: "Maison", francais: "Cuire au four", hebreu: "לאפות", niveau: "Beth" },
+{ categorie: "Maison", francais: "Laver (vaisselle, sol)", hebreu: "לשטוף", niveau: "Beth" },
+{ categorie: "Maison", francais: "Salir", hebreu: "ללכלך", niveau: "Beth" },
+{ categorie: "Maison", francais: "Entrepôt / Débarras / Cave", hebreu: "מחסן", niveau: "Beth" },
+{ categorie: "Maison", francais: "Intérieur", hebreu: "פנים", niveau: "Beth" },
+{ categorie: "Maison", francais: "Locataires", hebreu: "שוכרים", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Agent immobilier", hebreu: "מתווך", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Contrat", hebreu: "חוזה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Loyer", hebreu: "שכר דירה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Taxe foncière / Taxe municipale", hebreu: "ארנונה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Comité de copropriété", hebreu: "ועד בית", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Cage d'escalier", hebreu: "חדר מדרגות", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement meublé", hebreu: "דירה מרוהטת", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement spacieux", hebreu: "דירה מרווחת", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement lumineux", hebreu: "דירה מוארת", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement rénové", hebreu: "דירה משופצת", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement silencieux", hebreu: "דירה שקטה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Rez-de-chaussée", hebreu: "קומת קרקע", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Expositions / Directions de l'air", hebreu: "כיווני אוויר", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison inondée", hebreu: "בית מוצף", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Entrepôt / Dépôt d'emballage", hebreu: "בית אריזה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Maison / Appartement à vendre", hebreu: "דירה למכירה", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Mètre cube", hebreu: "מטר מעוקב", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Prêt immobilier / Hypothèque", hebreu: "משכנתא", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Propriétaire", hebreu: "בעל הבית", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Frais de location", hebreu: "דמי שכירות", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Évacuation / Libération des lieux", hebreu: "פינוי", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Rénovation / Travaux", hebreu: "שיפוץ", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Balcon / Terrasse", hebreu: "מרפסת", niveau: "Guimel" },
+{ categorie: "Maison", francais: "Salon / Salle de séjour", hebreu: "סלון", niveau: "Guimel" },
+
+//Nourriture-Course
+{ categorie: "Nourriture-Course", francais: "Nourriture / Repas", hebreu: "אוכל", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Pain", hebreu: "לחם", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Eau", hebreu: "מים", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Lait", hebreu: "חלב", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Fromage", hebreu: "גבינה", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Œuf", hebreu: "ביצה", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Viande", hebreu: "בשר", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Poulet", hebreu: "עוף", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Poisson", hebreu: "דג", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Riz", hebreu: "אורז", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Pomme", hebreu: "תפוח", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Tomate", hebreu: "עגבנייה", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Concombre", hebreu: "מלפפון", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Sucre", hebreu: "סוכר", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Sel", hebreu: "מלח", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Magasin", hebreu: "חנות", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Courses / Achats", hebreu: "קניות", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Caisse", hebreu: "קופה", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Sac (en plastique/papier)", hebreu: "שקית", niveau: "Aleph" },
+{ categorie: "Nourriture-Course", francais: "Argent", hebreu: "כסף", niveau: "Aleph" },
+
+{ categorie: "Nourriture-Course", francais: "Légumes", hebreu: "ירקות", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Fruits", hebreu: "פירות", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Huile", hebreu: "שמן", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Farine", hebreu: "קמח", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Pâtes", hebreu: "פסטה", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Beurre", hebreu: "חמאה", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Jus", hebreu: "מיץ", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Soupe", hebreu: "מרק", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Salade", hebreu: "סלט", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Dessert", hebreu: "קינוח", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Supermarché", hebreu: "סופרמרקט", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Chariot de supermarché", hebreu: "עגלת קניות", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Panier de courses", hebreu: "סל קניות", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Étagère / Rayon", hebreu: "מדף", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Prix", hebreu: "מחיר", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Facture / Addition", hebreu: "חשבון", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Promotion / Solde", hebreu: "מבצע", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Balance / Poids", hebreu: "משקל", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Choisir / Ramasser", hebreu: "ללקט", niveau: "Beth" },
+{ categorie: "Nourriture-Course", francais: "Acheter", hebreu: "לקנות", niveau: "Beth" },
+
+{ categorie: "Nourriture-Course", francais: "Ingrédients / Composants", hebreu: "רכיבים", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Valeur nutritive", hebreu: "ערך תזונתי", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Date d'expiration", hebreu: "תאריך תפוגה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Produits laitiers", hebreu: "מוצרי חלב", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Produits surgelés", hebreu: "מוצרים קפואים", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Conserves", hebreu: "שימורים", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Boulangerie", hebreu: "מאפייה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Qualité", hebreu: "איכות", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Kachrout (conformité rituelle)", hebreu: "כשרות", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Végétalien", hebreu: "טבעוני", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Végétarien", hebreu: "צמחוני", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Consommation", hebreu: "צריכה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Consommateur", hebreu: "צרכן", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Reçu / Ticket de caisse", hebreu: "קבלה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Carte de fidélité", hebreu: "כרטיס מועדון", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Réduction / Remise", hebreu: "הנחה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Emballage", hebreu: "אריזה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Importation", hebreu: "ייבוא", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Approvisionnement / Livraison", hebreu: "אספקה", niveau: "Guimel" },
+{ categorie: "Nourriture-Course", francais: "Commerce", hebreu: "סחר", niveau: "Guimel" },
+
+//Famille 
+{ categorie: "Famille", francais: "Famille", hebreu: "משפחה", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Père / Papa", hebreu: "אבא", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Mère / Maman", hebreu: "אמא", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Fils", hebreu: "בן", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Fille", hebreu: "בת", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Frère", hebreu: "אח", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Sœur", hebreu: "אחות", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Grand-père", hebreu: "סבא", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Grand-mère", hebreu: "סבתא", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Bébé", hebreu: "תינוק", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Enfant (garçon)", hebreu: "ילד", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Enfant (fille)", hebreu: "ילדה", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Homme / Époux", hebreu: "איש", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Femme / Épouse", hebreu: "אישה", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Oncle", hebreu: "דוד", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Tante", hebreu: "דודה", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Parents", hebreu: "הורים", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Enfants", hebreu: "ילדים", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Frères / Frères et sœurs", hebreu: "אחים", niveau: "Aleph" },
+{ categorie: "Famille", francais: "Foyer / Maison", hebreu: "בית", niveau: "Aleph" },
+
+{ categorie: "Famille", francais: "Petit-fils", hebreu: "נכד", niveau: "Beth" },
+{ categorie: "Famille", francais: "Petite-fille", hebreu: "נכדה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Cousin", hebreu: "בן דוד", niveau: "Beth" },
+{ categorie: "Famille", francais: "Cousine", hebreu: "בת דודה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Neveu", hebreu: "אחיין", niveau: "Beth" },
+{ categorie: "Famille", francais: "Nièce", hebreu: "אחיינית", niveau: "Beth" },
+{ categorie: "Famille", francais: "Gendre / Marié", hebreu: "חתן", niveau: "Beth" },
+{ categorie: "Famille", francais: "Belle-fille / Mariée", hebreu: "כלה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Beau-père (père du conjoint)", hebreu: "חמי", niveau: "Beth" },
+{ categorie: "Famille", francais: "Belle-mère (mère du conjoint)", hebreu: "חמותי", niveau: "Beth" },
+{ categorie: "Famille", francais: "Beau-frère", hebreu: "גיס", niveau: "Beth" },
+{ categorie: "Famille", francais: "Belle-sœur", hebreu: "גיסה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Couple", hebreu: "זוג", niveau: "Beth" },
+{ categorie: "Famille", francais: "Mariage (état)", hebreu: "נישואין", niveau: "Beth" },
+{ categorie: "Famille", francais: "Mariage (cérémonie)", hebreu: "חתונה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Ami / Compagnon", hebreu: "חבר", niveau: "Beth" },
+{ categorie: "Famille", francais: "Amie / Compagne", hebreu: "חברה", niveau: "Beth" },
+{ categorie: "Famille", francais: "Adulte / Personne âgée", hebreu: "מבוגר", niveau: "Beth" },
+{ categorie: "Famille", francais: "Jeune", hebreu: "צעיר", niveau: "Beth" },
+{ categorie: "Famille", francais: "Âge", hebreu: "גיל", niveau: "Beth" },
+
+{ categorie: "Famille", francais: "Parent / Membre de la famille", hebreu: "קרוב משפחה", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Proches / Parenté", hebreu: "קרובי משפחה", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Génération", hebreu: "דור", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Descendants / Progéniture", hebreu: "צאצאים", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Ancêtres", hebreu: "אבות קדמונים", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Arbre généalogique", hebreu: "אילן יוחסין", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Héritage / Patrimoine", hebreu: "מורשת", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Beau- (ex: beau-père par remariage)", hebreu: "חורג", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Beau-père (second mari de la mère)", hebreu: "אב חורג", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Belle-mère (seconde femme du père)", hebreu: "אם חורגת", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Demi-frère (sans lien de sang)", hebreu: "אח חורג", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Demi-frère (un parent en commun)", hebreu: "אח למחצה", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Jumeaux", hebreu: "תאומים", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Adoption", hebreu: "אימוץ", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Enfant adopté", hebreu: "ילד מאומץ", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Divorce", hebreu: "גירושין", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Veuf", hebreu: "אלמן", niveau: "Guimel" },
+{ categorie: "Famille", francais: "Veuve", hebreu: "אלמנה", niveau: "Guimel" },
+
+//Temps et calendrier
+{ categorie: "Temps et calendrier", francais: "Temps", hebreu: "זמן", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Heure", hebreu: "שעה", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Jour", hebreu: "יום", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Mois", hebreu: "חודש", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Année", hebreu: "שנה", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Semaine", hebreu: "שבוע", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Aujourd'hui", hebreu: "היום", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Demain", hebreu: "מחר", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Hier", hebreu: "אתמול", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Matin", hebreu: "בוקר", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Midi / Après-midi", hebreu: "צהריים", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Soir", hebreu: "ערב", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Nuit", hebreu: "לילה", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Maintenant", hebreu: "עכשיו", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Demi / Moitié", hebreu: "חצי", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Quart", hebreu: "רבע", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Minute", hebreu: "דקה", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Seconde", hebreu: "שנייה", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Quand", hebreu: "מתי", niveau: "Aleph" },
+{ categorie: "Temps et calendrier", francais: "Horloge / Montre", hebreu: "שעון", niveau: "Aleph" },
+
+{ categorie: "Temps et calendrier", francais: "Date", hebreu: "תאריך", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Date de naissance", hebreu: "תאריך לידה", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Calendrier", hebreu: "לוח שנה", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Vacances / Congé", hebreu: "חופש", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Fin de semaine / Weekend", hebreu: "סופ\"ש (סוף שבוע)", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Avant", hebreu: "לפני", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Après", hebreu: "אחרי", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Rendez-vous", hebreu: "מפגש / תור", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Retard", hebreu: "איחור", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Tôt", hebreu: "מוקדם", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Tard", hebreu: "מאוחר", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "À l'heure", hebreu: "בזמן", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Passé", hebreu: "עבר", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Moins", hebreu: "ל- (שעה)", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Demi-heure", hebreu: "חצי שעה", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Deux heures (durée)", hebreu: "שעתים", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Deux jours", hebreu: "יומיים", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Deux semaines", hebreu: "שבועיים", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Deux mois", hebreu: "חודשיים", niveau: "Beth" },
+{ categorie: "Temps et calendrier", francais: "Deux ans", hebreu: "שנתיים", niveau: "Beth" },
+
+{ categorie: "Temps et calendrier", francais: "Période / Époque", hebreu: "תקופה", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Saison", hebreu: "עונה", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Décennie", hebreu: "עשור", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Siècle", hebreu: "מאה", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Emploi du temps / Planning", hebreu: "לוח זמנים (לו\"ז)", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Routine", hebreu: "שגרה", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Moment choisi / Timing", hebreu: "עיתוי", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Urgence", hebreu: "דחיפות", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Temporaire", hebreu: "זמני", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Permanent / Fixe", hebreu: "קבוע", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Fréquence", hebreu: "תדירות", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Quotidiennement / Chaque jour", hebreu: "מדי יום", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Hebdomadairement", hebreu: "מדי שבוע", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Mensuellement", hebreu: "מדי חודש", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Au milieu de", hebreu: "באמצע", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Au cours de / Pendant", hebreu: "במהלך", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "À l'approche de / Vers", hebreu: "לקראת", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Heures d'ouverture / d'activité", hebreu: "שעות פעילות", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Compte à rebours", hebreu: "ספירה לאחור", niveau: "Guimel" },
+{ categorie: "Temps et calendrier", francais: "Heure d'été / d'hiver", hebreu: "שעון קיץ / חורף", niveau: "Guimel" },
+
+//Nombres
+{ categorie: "Nombres", francais: "Premier", hebreu: "ראשון", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Première", hebreu: "ראשונה", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Deuxième (masculin)", hebreu: "שני", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Deuxième (féminin)", hebreu: "שנייה", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Troisième (masculin)", hebreu: "שלישי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Troisième (féminin)", hebreu: "שלישית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Quatrième (masculin)", hebreu: "רביעי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Quatrième (féminin)", hebreu: "רביעית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Cinquième (masculin)", hebreu: "חמישי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Cinquième (féminin)", hebreu: "חמישית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Sixième (masculin)", hebreu: "שישי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Sixième (féminin)", hebreu: "שישית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Septième (masculin)", hebreu: "שביעי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Septième (féminin)", hebreu: "שביעית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Huitième (masculin)", hebreu: "שמיני", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Huitième (féminin)", hebreu: "שמינית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Neuvième (masculin)", hebreu: "תשיעי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Neuvième (féminin)", hebreu: "תשיעית", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Dixième (masculin)", hebreu: "עשירי", niveau: "Aleph" },
+{ categorie: "Nombres", francais: "Dixième (féminin)", hebreu: "עשירית", niveau: "Aleph" },
+
+{ categorie: "Nombres", francais: "Zéro", hebreu: "אפס", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Un (féminin)", hebreu: "אחת", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Un (masculin)", hebreu: "אחד", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Deux (féminin)", hebreu: "שתים", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Deux (masculin)", hebreu: "שניים", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Trois (féminin)", hebreu: "שלוש", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Trois (masculin)", hebreu: "שלושה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Quatre (féminin)", hebreu: "ארבע", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Quatre (masculin)", hebreu: "ארבעה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Cinq (féminin)", hebreu: "חמש", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Cinq (masculin)", hebreu: "חמישה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Six (féminin)", hebreu: "שש", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Six (masculin)", hebreu: "שישה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Sept (féminin)", hebreu: "שבע", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Sept (masculin)", hebreu: "שבעה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Huit (féminin)", hebreu: "שמונה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Huit (masculin)", hebreu: "שמונה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Neuf (féminin)", hebreu: "תשע", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Neuf (masculin)", hebreu: "תשעה", niveau: "Beth" },
+{ categorie: "Nombres", francais: "Dix (féminin)", hebreu: "עשר", niveau: "Beth" },
+
+{ categorie: "Nombres", francais: "Dix (masculin)", hebreu: "עשרה", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Vingt", hebreu: "עשרים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Trente", hebreu: "שלושים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Quarante", hebreu: "ארבעים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Cinquante", hebreu: "חמישים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Soixante", hebreu: "שישים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Soixante-dix", hebreu: "שבעים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Quatre-vingts", hebreu: "שמונים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Quatre-vingt-dix", hebreu: "תשעים", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Cent", hebreu: "מאה", niveau: "Guimel" },
+{ categorie: "Nombres", francais: "Mille", hebreu: "אלף", niveau: "Guimel" }
+
+
+];
+
+let currentList = [];
+let currentIndex = 0;
+let knownWords = new Set();
+let unknownWords = new Set();
+let isListView = false;
+
+window.onload = function () {
+    loadProgress();
+    applyFilters();
+};
+
+// Clé unique d'un mot (le même mot français existe dans plusieurs catégories)
+function wordKey(w) {
+    return w.categorie + "|" + w.francais + "|" + w.hebreu;
+}
+
+// Point d'entrée unique pour tous les filtres
+function applyFilters() {
+    initCategories(); // reconstruit la liste selon le niveau et garde la catégorie si possible
+
+    const cat = document.getElementById("categorySelect").value;
+    const lvl = document.getElementById("levelSelect").value;
+
+    currentList = rawData.filter(w =>
+        (cat === "ALL" || w.categorie === cat) &&
+        (lvl === "ALL" || w.niveau === lvl) &&
+        (!isReviewMode || unknownWords.has(wordKey(w)))
+    );
+
+    currentIndex = 0;
+    document.getElementById("reviewBtn").textContent =
+        isReviewMode ? "↩️ Quitter la révision" : "📖 Réviser les mots à réviser";
+
+    showCurrentCard();
+    renderListView();
+}
+
+function filterCategory() { applyFilters(); }
+function filterData()     { applyFilters(); }
+
+function initCategories() {
+    const select = document.getElementById("categorySelect");
+    const lvl = document.getElementById("levelSelect").value;
+    const previous = select.value || "ALL";
+
+    select.innerHTML = '<option value="ALL">Toutes les catégories</option>';
+
+    const categories = [...new Set(rawData.map(w => w.categorie))].sort();
+    categories.forEach(cat => {
+        const words = rawData.filter(w =>
+            w.categorie === cat && (lvl === "ALL" || w.niveau === lvl)
+        );
+        if (words.length === 0) return;
+
+        const known = words.filter(w => knownWords.has(wordKey(w))).length;
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = `${cat} — ${known}/${words.length}`;
+        select.appendChild(option);
+    });
+
+    // Si la catégorie n'existe plus pour ce niveau, retour à "Toutes"
+    const exists = [...select.options].some(o => o.value === previous);
+    select.value = exists ? previous : "ALL";
+}
+
+function reviewUnknownWords() {
+    if (!isReviewMode && unknownWords.size === 0) {
+        alert("Aucun mot à réviser pour le moment ! Marquez des mots avec 'Je ne connais pas' d'abord.");
+        return;
+    }
+    isReviewMode = !isReviewMode;
+    applyFilters();
+}
+
+function shuffleWords() {
+    for (let i = currentList.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentList[i], currentList[j]] = [currentList[j], currentList[i]];
+    }
+    currentIndex = 0;
+    showCurrentCard();
+    renderListView();
+}
+
+function showCurrentCard() {
+    if (currentList.length === 0) {
+        document.getElementById("frenchText").textContent =
+            isReviewMode ? "Plus aucun mot à réviser 🎉" : "Aucun mot dans cette liste.";
+        document.getElementById("hebrewContainer").classList.add("hidden");
+        document.getElementById("hint").classList.add("hidden");
+        document.getElementById("answerActions").classList.add("hidden");
+        updateStats();
+        return;
+    }
+
+    document.getElementById("answerActions").classList.remove("hidden");
+    const item = currentList[currentIndex];
+    document.getElementById("frenchText").textContent = item.francais;
+    document.getElementById("hebrewText").textContent = item.hebreu;
+
+    document.getElementById("hebrewContainer").classList.add("hidden");
+    document.getElementById("hint").classList.remove("hidden");
+    updateStats();
+}
+
+function nextCard() {
+    if (currentList.length === 0) return;
+    currentIndex = (currentIndex + 1) % currentList.length;
+    showCurrentCard();
+}
+
+function prevCard() {
+    if (currentList.length === 0) return;
+    currentIndex = (currentIndex - 1 + currentList.length) % currentList.length;
+    showCurrentCard();
+}
+
+function revealAnswer() {
+    if (currentList.length === 0) return;
+    document.getElementById("hebrewContainer").classList.remove("hidden");
+    document.getElementById("hint").classList.add("hidden");
+}
+
+function markAnswer(known) {
+    if (currentList.length === 0) return;
+    const key = wordKey(currentList[currentIndex]);
+
+    if (known) {
+        knownWords.add(key);
+        unknownWords.delete(key);
+    } else {
+        unknownWords.add(key);
+        knownWords.delete(key);
+    }
+    saveProgress();
+    initCategories();
+
+    // En mode révision, un mot désormais connu sort de la liste
+    if (isReviewMode && known) {
+        currentList.splice(currentIndex, 1);
+        if (currentIndex >= currentList.length) currentIndex = 0;
+        showCurrentCard();
+        renderListView();
+    } else {
+        nextCard();
+    }
+}
+
+function updateStats() {
+    document.getElementById("currentStats").textContent =
+        `${currentList.length > 0 ? currentIndex + 1 : 0} / ${currentList.length}`;
+    document.getElementById("knownCount").textContent = knownWords.size;
+    document.getElementById("unknownCount").textContent = unknownWords.size;
+}
+
+function speakText(text) {
+    const cleanText = text.split('/')[0].trim();
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=iw&client=tw-ob`;
+
+    const audio = new Audio(audioUrl);
+    audio.play().catch(() => {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(cleanText);
+            u.lang = 'he';
+            u.rate = 0.8;
+            window.speechSynthesis.speak(u);
+        }
+    });
+}
+
+function speakHebrew() {
+    speakText(document.getElementById("hebrewText").textContent);
+}
+
+function toggleListView() {
+    isListView = !isListView;
+    document.getElementById("flashcardView").classList.toggle("hidden", isListView);
+    document.getElementById("listView").classList.toggle("hidden", !isListView);
+}
+
+function renderListView() {
+    const tbody = document.getElementById("wordsTableBody");
+    tbody.innerHTML = "";
+
+    currentList.forEach(item => {
+        const tr = document.createElement("tr");
+
+        const tdFr = document.createElement("td");
+        tdFr.textContent = item.francais;
+
+        const tdHe = document.createElement("td");
+        tdHe.className = "td-hebrew";
+        tdHe.textContent = item.hebreu;
+
+        const tdBtn = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.style.cssText = "padding: 4px 8px; font-size: 0.9rem;";
+        btn.textContent = "🔊";
+        btn.addEventListener("click", () => speakText(item.hebreu));
+        tdBtn.appendChild(btn);
+
+        tr.append(tdFr, tdHe, tdBtn);
+        tbody.appendChild(tr);
+    });
+}
+
+function saveProgress() {
+    localStorage.setItem("hebrew_known", JSON.stringify([...knownWords]));
+    localStorage.setItem("hebrew_unknown", JSON.stringify([...unknownWords]));
+}
+
+function loadProgress() {
+    try {
+        const k = localStorage.getItem("hebrew_known");
+        const u = localStorage.getItem("hebrew_unknown");
+        if (k) knownWords = new Set(JSON.parse(k));
+        if (u) unknownWords = new Set(JSON.parse(u));
+    } catch (e) {
+        knownWords = new Set();
+        unknownWords = new Set();
+    }
+}
+
+function resetProgress() {
+    if (confirm("Voulez-vous réinitialiser le suivi de votre progression ?")) {
+        knownWords.clear();
+        unknownWords.clear();
+        localStorage.removeItem("hebrew_known");
+        localStorage.removeItem("hebrew_unknown");
+        isReviewMode = false;
+        applyFilters();
+    }
+}
+</script>
+</body>
+</html>
