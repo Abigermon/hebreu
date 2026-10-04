@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mémorisation Prépositions Hébreu</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: black;
+            margin-bottom: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .stats-bar {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+
+        .card-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            min-height: 220px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            cursor: pointer; /* Indique qu'on peut cliquer dessus */
+            transition: background-color 0.1s;
+        }
+
+        .card:active {
+            background-color: #f8fafc;
+        }
+
+        .hebrew-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 10px;
+            margin-bottom: 5px;
+            direction: rtl;
+        }
+
+        .answer-reveal {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 10px 0;
+            min-height: 30px;
+            direction: rtl;
+        }
+
+        .hint-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .btn-know {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-know:hover { background-color: #15803d; }
+
+        .btn-dont-know {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-dont-know:hover { background-color: #b91c1c; }
+        
+        /* Style QCM (Choix multiples) */
+        .choices-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .choice-btn {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .choice-btn:hover {
+            border-color: var(--primary);
+            background: #e0e7ff;
+        }
+        .choice-btn.correct {
+            background-color: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #065f46 !important;
+        }
+        .choice-btn.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: var(--danger) !important;
+            color: #991b1b !important;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-review-global {
+            width: 100%;
+            margin-top: 15px;
+            background-color: var(--text);
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-review-global:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Prépositions & Verbes en Hébreu</h1>
+        </header>
+
+        <!-- Contrôles et Filtres -->
+        <div class="controls">
+            <select id="prep-filter" onchange="filterByPrep()">
+                <option value="all">Toutes les prépositions (Mélangées)</option>
+                <option value="את">את</option>
+                <option value="ל">ל</option>
+                <option value="ב">ב</option>
+                <option value="אל">אל</option>
+                <option value="על">על</option>
+                <option value="עם">עם</option>
+                <option value="מ">מ</option>
+            </select>
+
+            <select id="mode-select" onchange="changeMode()">
+                <option value="flashcard">Mode Flashcard</option>
+                <option value="quiz">Mode QCM (3 choix)</option>
+            </select>
+        </div>
+
+        <!-- Barre de stats -->
+        <div class="stats-bar">
+            <span id="stat-progress">Carte 1 sur X</span>
+            <span id="stat-mode">Mode Flashcard</span>
+        </div>
+
+        <!-- Zone de la carte -->
+        <div class="card-container">
+            <button class="nav-btn" onclick="prevCard()">❮</button>
+            
+            <div class="card" onclick="handleCardClick()">
+                <div class="hint-text" id="prep-hint">Trouvez la préposition associée (Cliquez pour retourner) :</div>
+                <div class="hebrew-word" id="verb-clean">להכין</div>
+                
+                <!-- Zone optionnelle pour afficher la réponse complète -->
+                <div class="answer-reveal hidden" id="full-verb-display">להכין את</div>
+
+                <!-- Boutons interactifs Flashcard (Visibles immédiatement en bas) -->
+                <div id="flashcard-controls" style="width: 100%;">
+                    <div class="actions" id="flashcard-actions">
+                        <button class="btn-dont-know" onclick="event.stopPropagation(); markAnswer(false)">❌ Je ne connais pas</button>
+                        <button class="btn-know" onclick="event.stopPropagation(); markAnswer(true)">✅ Je connais</button>
+                    </div>
+                </div>
+
+                <!-- Boutons interactifs QCM -->
+                <div id="quiz-controls" class="choices-grid hidden"></div>
+            </div>
+
+            <button class="nav-btn" onclick="nextCard()">❯</button>
+        </div>
+
+        <!-- Bouton de révision des mots ratés -->
+        <button class="btn-review-global" id="review-btn" onclick="startReviewMode()" disabled>
+            Réviser les mots ratés (0)
+        </button>
+    </div>
+
+    <script>
+        const rawData = [
+            // את
+            { prep: "את", verbClean: "להזמין", full: "להזמין את... ל..." },
+            { prep: "את", verbClean: "לקנות", full: "לקנות את" },
+            { prep: "את", verbClean: "להכִּיר", full: "להכִּיר את" },
+            { prep: "את", verbClean: "לחפש", full: "לחפש את" },
+            { prep: "את", verbClean: "להכין", full: "להכין את" },
+            { prep: "את", verbClean: "לעזוב", full: "לעזוב את" },
+            { prep: "את", verbClean: "לבקר / להשאיר", full: "לבקר את... / להשאיר את... ב... / אצל" },
+            { prep: "את", verbClean: "לשאול", full: "לשאול את" },
+            { prep: "את", verbClean: "לקחת", full: "לקחת את מ..." },
+            { prep: "את", verbClean: "ללמד", full: "ללמד את" },
+            { prep: "את", verbClean: "לאבד", full: "לאבד את" },
+            { prep: "את", verbClean: "לפגוש", full: "לפגוש את" },
+            { prep: "את", verbClean: "לאהוב", full: "לאהוב את" },
+            { prep: "את", verbClean: "לצלם", full: "לצלם את" },
+            { prep: "את", verbClean: "לסיים", full: "לסיים את" },
+            { prep: "את", verbClean: "להבין", full: "להבין את" },
+            
+            // ל
+            { prep: "ל", verbClean: "לחכות", full: "לחכות ל" },
+            { prep: "ל", verbClean: "לדאוג", full: "לדאוג ל" },
+            { prep: "ל", verbClean: "לענות", full: "לענות ל" },
+            { prep: "ל", verbClean: "למסור", full: "למסור ל" },
+            { prep: "ל", verbClean: "להתאים", full: "להתאים ל" },
+            { prep: "ל", verbClean: "לעזור", full: "לעזור ל" },
+            { prep: "ל", verbClean: "להגיד - לומר", full: "להגיד- לומר ל" },
+            { prep: "ל", verbClean: "להקשִׁיב", full: "להקשִׁיב ל" },
+            { prep: "ל", verbClean: "לשלם", full: "לשלם ל" },
+            { prep: "ל", verbClean: "להבטִּיחַ", full: "להבטִּיחַ ל" },
+            { prep: "ל", verbClean: "להודיע", full: "להודיע ל" },
+            { prep: "ל", verbClean: "לאחר", full: "לאחר ל" },
+            { prep: "ל", verbClean: "להירשם", full: "להירשם ל" },
+            { prep: "ל", verbClean: "להאמין", full: "להאמין ל" },
+            { prep: "ל", verbClean: "לשלוח", full: "לשלוח ל" },
+            { prep: "ל", verbClean: "נמאס", full: "נמאס ל" },
+            { prep: "ל", verbClean: "להכניס", full: "להכניס את ל..." },
+            { prep: "ל", verbClean: "להחזיר", full: "להחזיר את ל..." },
+            { prep: "ל", verbClean: "אכפת", full: "אכפת ל..." },
+            { prep: "ל", verbClean: "להביא", full: "להביא את... ל..." },
+
+            // ב
+            { prep: "ב", verbClean: "להישאר", full: "להישאר ב / אצל" },
+            { prep: "ב", verbClean: "לטפל", full: "לטפל ב" },
+            { prep: "ב", verbClean: "להשתמש", full: "להשתמש ב" },
+            { prep: "ב", verbClean: "להצליח", full: "להצליח ב" },
+            { prep: "ב", verbClean: "להאמין", full: "להאמין ב" },
+            { prep: "ב", verbClean: "לבקר", full: "לבקר ב" },
+            { prep: "ב", verbClean: "לטייל", full: "לטייל ב" },
+            { prep: "ב", verbClean: "לגעת", full: "לגעת ב" },
+            { prep: "ב", verbClean: "להשתתף", full: "להשתתף ב" },
+            { prep: "ב", verbClean: "להיות גאה", full: "להיות גאה ב" },
+            { prep: "ב", verbClean: "להתאהב", full: "להתאהב ב" },
+            { prep: "ב", verbClean: "לפגוע", full: "לפגוע ב" },
+            { prep: "ב", verbClean: "תלוי", full: "תלוי ב" },
+            { prep: "ב", verbClean: "לבחור", full: "לבחור ב" },
+            { prep: "ב", verbClean: "לנגן", full: "לנגן ב" },
+            { prep: "ב", verbClean: "להסתכל", full: "להסתכל ב" },
+            { prep: "ב", verbClean: "להיות באִינטרנט, בפייסבוק", full: "להיות באִינטרנט, בפייסבוק" },
+            { prep: "ב", verbClean: "לדבר (טלפון)", full: "לדבר ב... (טלפון)" },
+
+            // אל
+            { prep: "אל", verbClean: "לבוא", full: "לבוא אל" },
+            { prep: "אל", verbClean: "ללכת", full: "ללכת אל" },
+            { prep: "אל", verbClean: "לטוס", full: "לטוס אל" },
+            { prep: "אל", verbClean: "לנסוע", full: "לנסוע אל" },
+            { prep: "אל", verbClean: "להיכנס", full: "להיכנס אל" },
+            { prep: "אל", verbClean: "להתקשר", full: "להתקשר אל" },
+            { prep: "אל", verbClean: "לצלצל", full: "לצלצל אל" },
+            { prep: "אל", verbClean: "לחזור", full: "לחזור אל" },
+            { prep: "אל", verbClean: "להתקרב", full: "להתקרב אל" },
+            { prep: "אל", verbClean: "לשום לב", full: "לשום לב אל" },
+            { prep: "אל", verbClean: "להתגעגע", full: "להתגעגע אל" },
+            { prep: "אל", verbClean: "קרוב", full: "קרוב אל" },
+            { prep: "אל", verbClean: "לפנות", full: "לפנות אל" },
+            { prep: "אל", verbClean: "להצטרף", full: "להצטרף אל" },
+
+            // על
+            { prep: "על", verbClean: "לכעוס", full: "לכעוס על" },
+            { prep: "על", verbClean: "לצעוק", full: "לצעוק על" },
+            { prep: "על", verbClean: "לחשוב", full: "לחשוב על" },
+            { prep: "על", verbClean: "להסתכל", full: "להסתכל על" },
+            { prep: "על", verbClean: "להצטער", full: "להצטער על" },
+            { prep: "על", verbClean: "לשמור", full: "לשמור על" },
+            { prep: "על", verbClean: "לדבר", full: "לדבר על" },
+            { prep: "על", verbClean: "להמליץ", full: "להמליץ על" },
+            { prep: "על", verbClean: "לענות", full: "לענות ל... על..." },
+            { prep: "על", verbClean: "לחתום", full: "לחתום על" },
+            { prep: "על", verbClean: "להתלונן", full: "להתלונן על" },
+            { prep: "על", verbClean: "לסמוך", full: "לסמוך על" },
+            { prep: "על", verbClean: "למות", full: "למות על" },
+
+            // עם
+            { prep: "עם", verbClean: "להיפגש", full: "להיפגש עם" },
+            { prep: "עם", verbClean: "לדבר", full: "לדבר עם" },
+            { prep: "עם", verbClean: "להתחתן", full: "להתחתן עם" },
+            { prep: "עם", verbClean: "להסכים", full: "להסכים עם" },
+
+            // מ
+            { prep: "מ", verbClean: "להיזהר", full: "להיזהר מ" },
+            { prep: "מ", verbClean: "לקבל", full: "לקבל מ" },
+            { prep: "מ", verbClean: "לקחת", full: "לקחת מ" },
+            { prep: "מ", verbClean: "לפחד", full: "לפחד מ" }
+        ];
+
+        const allPreps = ["את", "ל", "ב", "אל", "על", "עם", "מ"];
+
+        let filteredData = [];
+        let currentIndex = 0;
+        let unknownWordsList = [];
+        let isReviewMode = false;
+        let currentMode = 'flashcard';
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function filterByPrep() {
+            const selectedPrep = document.getElementById('prep-filter').value;
+            isReviewMode = false;
+            
+            if (selectedPrep === 'all') {
+                filteredData = shuffleArray(rawData);
+            } else {
+                filteredData = rawData.filter(item => item.prep === selectedPrep);
+            }
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function changeMode() {
+            currentMode = document.getElementById('mode-select').value;
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function displayCard() {
+            if (filteredData.length === 0) {
+                document.getElementById('verb-clean').innerText = "Aucun mot";
+                document.getElementById('full-verb-display').innerText = "";
+                document.getElementById('stat-progress').innerText = "0 sur 0";
+                return;
+            }
+
+            const currentItem = filteredData[currentIndex];
+            document.getElementById('verb-clean').innerText = currentItem.verbClean;
+            document.getElementById('stat-progress').innerText = `Carte ${currentIndex + 1} sur ${filteredData.length} ${isReviewMode ? '(Révision)' : ''}`;
+            document.getElementById('stat-mode').innerText = currentMode === 'flashcard' ? 'Mode Flashcard' : 'Mode QCM';
+
+            const flashcardControls = document.getElementById('flashcard-controls');
+            const quizControls = document.getElementById('quiz-controls');
+            const fullDisplay = document.getElementById('full-verb-display');
+
+            if (currentMode === 'flashcard') {
+                flashcardControls.classList.remove('hidden');
+                quizControls.classList.add('hidden');
+                fullDisplay.classList.add('hidden');
+                fullDisplay.innerText = currentItem.full;
+            } else {
+                flashcardControls.classList.add('hidden');
+                quizControls.classList.remove('hidden');
+                fullDisplay.classList.add('hidden');
+                
+                let choices = [currentItem.prep];
+                while (choices.length < 3) {
+                    let rand = allPreps[Math.floor(Math.random() * allPreps.length)];
+                    if (!choices.includes(rand)) choices.push(rand);
+                }
+                choices = shuffleArray(choices);
+
+                let html = '';
+                choices.forEach(p => {
+                    html += `<button class="choice-btn" onclick="checkQuizChoice(event, this, '${p}', '${currentItem.prep}')">${p}</button>`;
+                });
+                quizControls.innerHTML = html;
+            }
+        }
+
+        // Fonction déclenchée lors du clic sur la carte entière en mode flashcard
+        function handleCardClick() {
+            if (currentMode === 'flashcard') {
+                revealCard();
+            }
+        }
+
+        function revealCard() {
+            const currentItem = filteredData[currentIndex];
+            const fullDisplay = document.getElementById('full-verb-display');
+            fullDisplay.innerText = currentItem.full;
+            fullDisplay.classList.remove('hidden');
+        }
+
+        function markAnswer(known) {
+            const currentItem = filteredData[currentIndex];
+            if (!known) {
+                if (!unknownWordsList.some(item => item.full === currentItem.full)) {
+                    unknownWordsList.push(currentItem);
+                }
+            } else {
+                let index = unknownWordsList.findIndex(item => item.full === currentItem.full);
+                if (index > -1) unknownWordsList.splice(index, 1);
+            }
+            updateReviewButton();
+            nextCard();
+        }
+
+        function checkQuizChoice(event, btnElement, selected, correct) {
+            event.stopPropagation(); // Évite de déclencher le clic de la carte
+            const allBtns = document.querySelectorAll('.choice-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            const currentItem = filteredData[currentIndex];
+
+            if (selected === correct) {
+                btnElement.classList.add('correct');
+                setTimeout(() => nextCard(), 700);
+            } else {
+                btnElement.classList.add('incorrect');
+                if (!unknownWordsList.some(item => item.full === currentItem.full)) {
+                    unknownWordsList.push(currentItem);
+                }
+                allBtns.forEach(b => {
+                    if (b.innerText === correct) b.classList.add('correct');
+                });
+                setTimeout(() => nextCard(), 1200);
+            }
+            updateReviewButton();
+        }
+
+        function nextCard() {
+            currentIndex++;
+            if (currentIndex >= filteredData.length) {
+                if (isReviewMode) {
+                    isReviewMode = false;
+                    filterByPrep();
+                    return;
+                }
+                currentIndex = 0;
+            }
+            displayCard();
+        }
+
+        function prevCard() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = filteredData.length - 1;
+            }
+            displayCard();
+        }
+
+        function startReviewMode() {
+            if (unknownWordsList.length === 0) return;
+            isReviewMode = true;
+            filteredData = shuffleArray(unknownWordsList);
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function updateReviewButton() {
+            const btn = document.getElementById('review-btn');
+            btn.innerText = `Réviser les mots ratés (${unknownWordsList.length})`;
+            btn.disabled = unknownWordsList.length === 0;
+        }
+
+        window.onload = () => {
+            filteredData = shuffleArray(rawData);
+            displayCard();
+        };
+    </script>
+</body>
+</html>
