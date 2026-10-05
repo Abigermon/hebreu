@@ -107,7 +107,7 @@
             justify-content: center;
             align-items: center;
             user-select: none;
-            cursor: pointer; /* Indique qu'on peut cliquer dessus */
+            cursor: pointer;
             transition: background-color 0.1s;
         }
 
@@ -223,6 +223,41 @@
             background-color: #cbd5e1;
             cursor: not-allowed;
         }
+
+        /* Style pour le mode liste */
+        .list-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .list-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .list-table th, .list-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .list-table th {
+            background-color: #f1f5f9;
+            color: var(--text);
+        }
+
+        .list-table td.rtl {
+            direction: rtl;
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -230,9 +265,9 @@
     <div class="container">
         <header>
             <h1>Prépositions & Verbes en Hébreu</h1>
-            <div><button onclick="window.location.href='index.html'">
-    🏠 Accueil
-</button></div>
+            <div>
+                <button onclick="window.location.href='index.html'">🏠 Accueil</button>
+            </div>
         </header>
 
         <!-- Contrôles et Filtres -->
@@ -252,26 +287,27 @@
                 <option value="flashcard">Mode Flashcard</option>
                 <option value="quiz">Mode QCM (3 choix)</option>
             </select>
+
+            <button onclick="toggleListView()" id="btn-toggle-list">📋 Mode Liste</button>
         </div>
 
         <!-- Barre de stats -->
-        <div class="stats-bar">
+        <div class="stats-bar" id="stats-bar">
             <span id="stat-progress">Carte 1 sur X</span>
             <span id="stat-mode">Mode Flashcard</span>
         </div>
 
         <!-- Zone de la carte -->
-        <div class="card-container">
+        <div class="card-container" id="game-container">
             <button class="nav-btn" onclick="prevCard()">❮</button>
             
             <div class="card" onclick="handleCardClick()">
                 <div class="hint-text" id="prep-hint">Trouvez la préposition associée (Cliquez pour retourner) :</div>
                 <div class="hebrew-word" id="verb-clean">להכין</div>
                 
-                <!-- Zone optionnelle pour afficher la réponse complète -->
                 <div class="answer-reveal hidden" id="full-verb-display">להכין את</div>
 
-                <!-- Boutons interactifs Flashcard (Visibles immédiatement en bas) -->
+                <!-- Boutons interactifs Flashcard -->
                 <div id="flashcard-controls" style="width: 100%;">
                     <div class="actions" id="flashcard-actions">
                         <button class="btn-dont-know" onclick="event.stopPropagation(); markAnswer(false)">❌ Je ne connais pas</button>
@@ -284,6 +320,22 @@
             </div>
 
             <button class="nav-btn" onclick="nextCard()">❯</button>
+        </div>
+
+        <!-- Mode Liste (caché par défaut) -->
+        <div class="list-container hidden" id="list-view-container">
+            <table class="list-table">
+                <thead>
+                    <tr>
+                        <th>Préposition</th>
+                        <th>Verbe (Net)</th>
+                        <th>Expression complète</th>
+                    </tr>
+                </thead>
+                <tbody id="list-table-body">
+                    <!-- Rempli dynamiquement -->
+                </tbody>
+            </table>
         </div>
 
         <!-- Bouton de révision des mots ratés -->
@@ -405,6 +457,7 @@
         let unknownWordsList = [];
         let isReviewMode = false;
         let currentMode = 'flashcard';
+        let isListViewActive = false;
 
         function shuffleArray(array) {
             let arr = [...array];
@@ -476,7 +529,6 @@
             }
         }
 
-        // Fonction déclenchée lors du clic sur la carte entière en mode flashcard
         function handleCardClick() {
             if (currentMode === 'flashcard') {
                 revealCard();
@@ -505,7 +557,7 @@
         }
 
         function checkQuizChoice(event, btnElement, selected, correct) {
-            event.stopPropagation(); // Évite de déclencher le clic de la carte
+            event.stopPropagation(); 
             const allBtns = document.querySelectorAll('.choice-btn');
             allBtns.forEach(b => b.disabled = true);
 
@@ -513,27 +565,44 @@
 
             if (selected === correct) {
                 btnElement.classList.add('correct');
+                if (isReviewMode) {
+                    let index = unknownWordsList.findIndex(item => item.full === currentItem.full);
+                    if (index > -1) unknownWordsList.splice(index, 1);
+                    updateReviewButton();
+                }
                 setTimeout(() => nextCard(), 700);
             } else {
                 btnElement.classList.add('incorrect');
                 if (!unknownWordsList.some(item => item.full === currentItem.full)) {
                     unknownWordsList.push(currentItem);
                 }
+                updateReviewButton(); // Met à jour le compteur (le mot vient d'être rajouté)
                 allBtns.forEach(b => {
                     if (b.innerText === correct) b.classList.add('correct');
                 });
                 setTimeout(() => nextCard(), 1200);
             }
-            updateReviewButton();
         }
 
         function nextCard() {
             currentIndex++;
             if (currentIndex >= filteredData.length) {
                 if (isReviewMode) {
-                    isReviewMode = false;
-                    filterByPrep();
-                    return;
+                    // Si on est en mode révision, on vérifie s'il reste de vrais ratés
+                    if (unknownWordsList.length > 0) {
+                        // S'il reste des mots (notamment le dernier raté qu'on vient de louper), 
+                        // on recharge dynamiquement la liste des ratés pour continuer sans message de fin prématuré !
+                        filteredData = shuffleArray(unknownWordsList);
+                        currentIndex = 0;
+                        displayCard();
+                        return;
+                    } else {
+                        // Vraie fin : plus aucun mot raté
+                        isReviewMode = false;
+                        alert("🎉 Bravo ! Tu as terminé la révision de tous tes mots ratés.");
+                        filterByPrep();
+                        return;
+                    }
                 }
                 currentIndex = 0;
             }
@@ -560,6 +629,43 @@
             const btn = document.getElementById('review-btn');
             btn.innerText = `Réviser les mots ratés (${unknownWordsList.length})`;
             btn.disabled = unknownWordsList.length === 0;
+        }
+
+        // Gestion du Mode Liste
+        function toggleListView() {
+            isListViewActive = !isListViewActive;
+            const gameContainer = document.getElementById('game-container');
+            const statsBar = document.getElementById('stats-bar');
+            const listViewContainer = document.getElementById('list-view-container');
+            const btnToggle = document.getElementById('btn-toggle-list');
+
+            if (isListViewActive) {
+                gameContainer.classList.add('hidden');
+                statsBar.classList.add('hidden');
+                listViewContainer.classList.remove('hidden');
+                btnToggle.innerText = "🎮 Mode Jeu";
+                populateListView();
+            } else {
+                gameContainer.classList.remove('hidden');
+                statsBar.classList.remove('hidden');
+                listViewContainer.classList.add('hidden');
+                btnToggle.innerText = "📋 Mode Liste";
+            }
+        }
+
+        function populateListView() {
+            const tbody = document.getElementById('list-table-body');
+            let html = '';
+            rawData.forEach(item => {
+                html += `
+                    <tr>
+                        <td class="rtl">${item.prep}</td>
+                        <td class="rtl">${item.verbClean}</td>
+                        <td>${item.full}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
         }
 
         window.onload = () => {
