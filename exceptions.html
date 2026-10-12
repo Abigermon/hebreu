@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mémorisation Exceptions & Pluriels Hébreu</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: black;
+            margin-bottom: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .stats-bar {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+
+        .card-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            min-height: 220px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .card:active {
+            background-color: #f8fafc;
+        }
+
+        .hebrew-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 10px;
+            margin-bottom: 5px;
+            direction: rtl;
+        }
+
+        .translation-text {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+
+        .answer-reveal {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 10px 0;
+            min-height: 30px;
+            direction: rtl;
+        }
+
+        .hint-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .btn-know {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-know:hover { background-color: #15803d; }
+
+        .btn-dont-know {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-dont-know:hover { background-color: #b91c1c; }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-review-global {
+            width: 100%;
+            margin-top: 15px;
+            background-color: var(--text);
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-review-global:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Style pour le mode liste */
+        .list-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .list-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .list-table th, .list-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .list-table th {
+            background-color: #f1f5f9;
+            color: var(--text);
+        }
+
+        .list-table td.rtl {
+            direction: rtl;
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Exceptions & Pluriels en Hébreu</h1>
+            <div>
+                <button onclick="window.location.href='index.html'">🏠 Accueil</button>
+            </div>
+        </header>
+
+        <!-- Contrôles et Filtres -->
+        <div class="controls">
+            <select id="group-filter" onchange="filterByGroup()">
+                <option value="all">Tous les groupes (Mélangés)</option>
+                <option value="Masculins pluriel en -ot">Masculins pluriel en -ot (Règles et Exceptions)</option>
+                <option value="Masculins singulier en -t">Masculins singulier en -t (pluriel en -im)</option>
+                <option value="Noms du corps et duels">Noms du corps et duels (-ayim)</option>
+                <option value="Féminins pluriel masculin">Féminins avec pluriel masculin (-im)</option>
+                <option value="Féminins singuliers sans terminaison">Féminins singuliers sans terminaison (-t/-h)</option>
+            </select>
+
+            <button onclick="toggleListView()" id="btn-toggle-list">📋 Mode Liste</button>
+        </div>
+
+        <!-- Barre de stats -->
+        <div class="stats-bar" id="stats-bar">
+            <span id="stat-progress">Carte 1 sur X</span>
+            <span id="stat-mode">Mode Flashcard</span>
+        </div>
+
+        <!-- Zone de la carte -->
+        <div class="card-container" id="game-container">
+            <button class="nav-btn" onclick="prevCard()">❮</button>
+            
+            <div class="card" onclick="handleCardClick()">
+                <div class="hint-text">Trouvez le pluriel / la forme associée (Cliquez pour retourner) :</div>
+                <div class="hebrew-word" id="word-singular">אב</div>
+                <div class="translation-text" id="word-translation">père</div>
+                
+                <div class="answer-reveal hidden" id="word-plural">אבות כנענים</div>
+
+                <!-- Boutons interactifs Flashcard -->
+                <div id="flashcard-controls" style="width: 100%;">
+                    <div class="actions" id="flashcard-actions">
+                        <button class="btn-dont-know" onclick="event.stopPropagation(); markAnswer(false)">❌ Je ne connais pas</button>
+                        <button class="btn-know" onclick="event.stopPropagation(); markAnswer(true)">✅ Je connais</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="nav-btn" onclick="nextCard()">❯</button>
+        </div>
+
+        <!-- Mode Liste (caché par défaut) -->
+        <div class="list-container hidden" id="list-view-container">
+            <table class="list-table">
+                <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th>Singulier / Mot de base</th>
+                        <th>Traduction</th>
+                        <th>Pluriel / Forme associée</th>
+                    </tr>
+                </thead>
+                <tbody id="list-table-body">
+                    <!-- Rempli dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bouton de révision des mots ratés -->
+        <button class="btn-review-global" id="review-btn" onclick="startReviewMode()" disabled>
+            Réviser les mots ratés (0)
+        </button>
+    </div>
+
+    <script>
+        const rawData = [
+            // Groupe Masculins pluriel en -ot (A + A suite + B)
+            { group: "Masculins pluriel en -ot", singular: "אב", translation: "père", plural: "אבות כנענים" },
+            { group: "Masculins pluriel en -ot", singular: "אולם", translation: "salle", plural: "אולמות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "אור", translation: "lumière", plural: "אורות יפים" },
+            { group: "Masculins pluriel en -ot", singular: "אות", translation: "signe / lettre", plural: "אותיות מיוחדות" },
+            { group: "Masculins pluriel en -ot", singular: "אסון", translation: "catastrophe", plural: "אסונות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "ארון", translation: "armoire", plural: "ארונות גבוהים" },
+            { group: "Masculins pluriel en -ot", singular: "ארמון", translation: "palais", plural: "ארמונות מפוארים" },
+            { group: "Masculins pluriel en -ot", singular: "בור", translation: "puits / fosse", plural: "בורות עמוקים" },
+            { group: "Masculins pluriel en -ot", singular: "גבול", translation: "frontière", plural: "גבולות משותפים" },
+            { group: "Masculins pluriel en -ot", singular: "גג", translation: "toit", plural: "גגות אדומים" },
+            { group: "Masculins pluriel en -ot", singular: "דור", translation: "génération", plural: "דורות הבאים" },
+            { group: "Masculins pluriel en -ot", singular: "וילון", translation: "rideau", plural: "וילונות נקיים" },
+            { group: "Masculins pluriel en -ot", singular: "זוג", translation: "paire / couple", plural: "זוגות מאושרים" },
+            { group: "Masculins pluriel en -ot", singular: "חוב", translation: "dette", plural: "חובות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "חלום", translation: "rêve", plural: "חלומות אמיתיים" },
+            { group: "Masculins pluriel en -ot", singular: "חלון", translation: "fenêtre", plural: "חלונות נקיים" },
+            { group: "Masculins pluriel en -ot", singular: "חשש", translation: "crainte", plural: "חששות מוצדקים" },
+            { group: "Masculins pluriel en -ot", singular: "ירק", translation: "légume", plural: "ירקות טעימים" },
+            { group: "Masculins pluriel en -ot", singular: "כוח", translation: "force", plural: "כוחות חזקים" },
+            { group: "Masculins pluriel en -ot", singular: "כיסא", translation: "chaise", plural: "כסאות נוחים" },
+            { group: "Masculins pluriel en -ot", singular: "לב", translation: "cœur", plural: "לבבות חמים" },
+            { group: "Masculins pluriel en -ot", singular: "לוח", translation: "tableau", plural: "לוחות לבנים" },
+            { group: "Masculins pluriel en -ot", singular: "לילה", translation: "nuit", plural: "לילות ארוכים" },
+            { group: "Masculins pluriel en -ot", singular: "לקוח", translation: "client", plural: "לקוחות נכבדים" },
+            { group: "Masculins pluriel en -ot", singular: "מאורע", translation: "événement", plural: "מאורעות חדשים" },
+            { group: "Masculins pluriel en -ot", singular: "מוסד", translation: "institution", plural: "מוסדות חינוכיים" },
+            { group: "Masculins pluriel en -ot", singular: "מזל", translation: "chance", plural: "מזלות יפים" },
+            { group: "Masculins pluriel en -ot", singular: "מחנה", translation: "camp", plural: "מחנות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "מזון", translation: "nourriture", plural: "מזונות כשרים" },
+            { group: "Masculins pluriel en -ot", singular: "מלון", translation: "hôtel", plural: "מלונות מפוארים" },
+            { group: "Masculins pluriel en -ot", singular: "מפתח", translation: "clé", plural: "מפתחות קשים" },
+            { group: "Masculins pluriel en -ot", singular: "מקום", translation: "endroit", plural: "מקומות רחוקים" },
+            { group: "Masculins pluriel en -ot", singular: "מקור", translation: "source", plural: "מקורות עתיקים" },
+            { group: "Masculins pluriel en -ot", singular: "מקצוע", translation: "métier", plural: "מקצועות מעניינים" },
+            { group: "Masculins pluriel en -ot", singular: "נר", translation: "bougie", plural: "נרות דולקים" },
+            { group: "Masculins pluriel en -ot", singular: "נייר", translation: "papier", plural: "ניירות לבנים" },
+            { group: "Masculins pluriel en -ot", singular: "סוד", translation: "secret", plural: "סודות כמוסים" },
+            { group: "Masculins pluriel en -ot", singular: "עולם", translation: "monde", plural: "עולמות שונים" },
+            { group: "Masculins pluriel en -ot", singular: "עוף", translation: "volaille / oiseau", plural: "עופות דורסים" },
+            { group: "Masculins pluriel en -ot", singular: "פרי", translation: "fruit", plural: "פירות טעימים" },
+            { group: "Masculins pluriel en -ot", singular: "צבא", translation: "armée", plural: "צבאות חזקים" },
+            { group: "Masculins pluriel en -ot", singular: "קול", translation: "voix", plural: "קולות יפים" },
+            { group: "Masculins pluriel en -ot", singular: "קיר", translation: "mur", plural: "קירות חזקים" },
+            { group: "Masculins pluriel en -ot", singular: "קרב", translation: "bataille", plural: "קרבות נוראים" },
+            { group: "Masculins pluriel en -ot", singular: "רגש", translation: "sentiment", plural: "רגשות חזקים" },
+            { group: "Masculins pluriel en -ot", singular: "רחוב", translation: "rue", plural: "רחובות נקיים" },
+            { group: "Masculins pluriel en -ot", singular: "ריח", translation: "odeur", plural: "ריחות טעימים" },
+            { group: "Masculins pluriel en -ot", singular: "רצון", translation: "volonté", plural: "רצונות טובים" },
+            { group: "Masculins pluriel en -ot", singular: "שבוע", translation: "semaine", plural: "שבועות ארוכים" },
+            { group: "Masculins pluriel en -ot", singular: "שדה", translation: "champ", plural: "שדות ירוקים" },
+            { group: "Masculins pluriel en -ot", singular: "שולחן", translation: "table", plural: "שולחנות עגולים" },
+            { group: "Masculins pluriel en -ot", singular: "שם", translation: "nom", plural: "שמות יפים" },
+            { group: "Masculins pluriel en -ot", singular: "תינוק", translation: "bébé", plural: "תינוקות חמודים" },
+            { group: "Masculins pluriel en -ot", singular: "זיכרון", translation: "souvenir", plural: "זיכרונות קטנים" },
+            { group: "Masculins pluriel en -ot", singular: "חיסכון", translation: "économie", plural: "חסכונות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "חיסרון", translation: "inconvénient", plural: "חסרונות בולטים" },
+            { group: "Masculins pluriel en -ot", singular: "כישלון", translation: "échec", plural: "כשלונות קטנים" },
+            { group: "Masculins pluriel en -ot", singular: "ניסיון", translation: "expérience", plural: "נסיונות קשים" },
+            { group: "Masculins pluriel en -ot", singular: "ניצחון", translation: "victoire", plural: "נצחונות נאים" },
+            { group: "Masculins pluriel en -ot", singular: "עיקרון", translation: "principe", plural: "עקרונות חשובים" },
+            { group: "Masculins pluriel en -ot", singular: "עיפרון", translation: "crayon", plural: "עפרונות חדשים" },
+            { group: "Masculins pluriel en -ot", singular: "דמיון", translation: "imagination", plural: "דמיונות מרהיבים" },
+            { group: "Masculins pluriel en -ot", singular: "חשבון", translation: "compte / addition", plural: "חשבונות קשים" },
+            { group: "Masculins pluriel en -ot", singular: "יתרון", translation: "avantage", plural: "יתרונות גדולים" },
+            { group: "Masculins pluriel en -ot", singular: "כישרון", translation: "talent", plural: "כשרונות קטנים" },
+            { group: "Masculins pluriel en -ot", singular: "פתרון", translation: "solution", plural: "פתרונות טובים" },
+            { group: "Masculins pluriel en -ot", singular: "ריאיון", translation: "entretien", plural: "ראיונות ארוכים" },
+            { group: "Masculins pluriel en -ot", singular: "רישיון", translation: "permis", plural: "רשיונות חדשים" },
+            { group: "Masculins pluriel en -ot", singular: "רעיון", translation: "idée", plural: "רעיונות טובים" },
+            { group: "Masculins pluriel en -ot", singular: "שלטון", translation: "pouvoir / régime", plural: "שלטונות חזקים" },
+
+            // Groupe Masculins singulier en -t (Catégorie C avec adjectifs accordés)
+            { group: "Masculins singulier en -t", singular: "בית", translation: "maison", plural: "בתים חדשים" },
+            { group: "Masculins singulier en -t", singular: "זית", translation: "olive", plural: "זיתים טעימים" },
+            { group: "Masculins singulier en -t", singular: "צוות", translation: "équipe", plural: "צוותים מקצועיים" },
+            { group: "Masculins singulier en -t", singular: "צומת", translation: "carrefour", plural: "צמתים מרכזיים" },
+            { group: "Masculins singulier en -t", singular: "שירות", translation: "service", plural: "שירותים ציבוריים" },
+            { group: "Masculins singulier en -t", singular: "תות", translation: "fraise", plural: "תותים מתוקים" },
+
+            // Groupe Noms du corps et duels (Catégorie D)
+            { group: "Noms du corps et duels", singular: "מותן (זכר)", translation: "taille / flanc", plural: "מותניים שבורות" },
+            { group: "Noms du corps et duels", singular: "קרסול (זכר)", translation: "cheville", plural: "קרסוליים נפוחות" },
+            { group: "Noms du corps et duels", singular: "עפעף (זכר)", translation: "paupière", plural: "עפעפיים אדומים" },
+            { group: "Noms du corps et duels", singular: "אופן (זכר)", translation: "roue / vélo", plural: "אופניים מהירים" },
+            { group: "Noms du corps et duels", singular: "גרב (זכר)", translation: "chaussette", plural: "גרביים צבעוניים" },
+            { group: "Noms du corps et duels", singular: "מגף (זכר)", translation: "botted", plural: "מגפיים שחורים" },
+            { group: "Noms du corps et duels", singular: "מכנס (זכר)", translation: "pantalon", plural: "מכנסיים קצרים" },
+            { group: "Noms du corps et duels", singular: "מספר (זכר)", translation: "ciseaux", plural: "מספריים חדים" },
+            { group: "Noms du corps et duels", singular: "משקף (זכר)", translation: "lunettes", plural: "משקפיים עגולים" },
+            { group: "Noms du corps et duels", singular: "אוזן (נקבה)", translation: "oreille", plural: "אוזניים גדולות" },
+            { group: "Noms du corps et duels", singular: "ברך (נקבה)", translation: "genou", plural: "ברכיים ארוכות" },
+            { group: "Noms du corps et duels", singular: "יד (נקבה)", translation: "main", plural: "ידיים חמות" },
+            { group: "Noms du corps et duels", singular: "לחי (נקבה)", translation: "joue", plural: "לחיים وרודות" },
+            { group: "Noms du corps et duels", singular: "עין (נקבה)", translation: "œil", plural: "עיניים כחולות" },
+            { group: "Noms du corps et duels", singular: "רגל (נקבה)", translation: "pied / jambe", plural: "רגליים קצרות" },
+            { group: "Noms du corps et duels", singular: "שן (נקבה)", translation: "dent", plural: "שיניים לבנות" },
+            { group: "Noms du corps et duels", singular: "שפה (נקבה)", translation: "lèvre / langue", plural: "שפתיים אדומות" },
+            { group: "Noms du corps et duels", singular: "נעל (נקבה)", translation: "chaussure", plural: "נעליים גבוהות" },
+
+            // Groupe Féminins pluriel masculin (Catégorie E avec adjectifs accordés)
+            { group: "Féminins pluriel masculin", singular: "אבן", translation: "pierre", plural: "אבנים גדולות" },
+            { group: "Féminins pluriel masculin", singular: "אישה", translation: "femme", plural: "נשים יפות" },
+            { group: "Féminins pluriel masculin", singular: "מילה", translation: "mot", plural: "מילים קצרות" },
+            { group: "Féminins pluriel masculin", singular: "דרך", translation: "chemin / route", plural: "דרכים ארוכות" },
+            { group: "Féminins pluriel masculin", singular: "שנה", translation: "année", plural: "שנים טובות" },
+            { group: "Féminins pluriel masculin", singular: "עיר", translation: "ville", plural: "ערים גדולות" },
+            { group: "Féminins pluriel masculin", singular: "פעם", translation: "fois", plural: "פעמים רבות" },
+            { group: "Féminins pluriel masculin", singular: "נמלה", translation: "fourmi", plural: "נמלים קטנות" },
+            { group: "Féminins pluriel masculin", singular: "דבורה", translation: "abeille", plural: "דבורים רועשות" },
+            { group: "Féminins pluriel masculin", singular: "יונה", translation: "colombe", plural: "יונים לבנות" },
+
+            // Groupe Féminins singuliers sans terminaison (Catégorie F avec adjectifs accordés)
+            { group: "Féminins singuliers sans terminaison", singular: "אם", translation: "mère", plural: "אימהות מדהימות" },
+            { group: "Féminins singuliers sans terminaison", singular: "אצבע", translation: "doigt", plural: "אצבעות ארוכות" },
+            { group: "Féminins singuliers sans terminaison", singular: "ארץ", translation: "pays", plural: "ארצות רחוקות" },
+            { group: "Féminins singuliers sans terminaison", singular: "גדר", translation: "clôture / haie", plural: "גדרות גבוהות" },
+            { group: "Féminins singuliers sans terminaison", singular: "דת", translation: "religion", plural: "דתות שונות" },
+            { group: "Féminins singuliers sans terminaison", singular: "חצר", translation: "cour", plural: "חצרות רחבות" },
+            { group: "Féminins singuliers sans terminaison", singular: "כוס", translation: "verre / tasse", plural: "כוסות נקיות" },
+            { group: "Féminins singuliers sans terminaison", singular: "לשון", translation: "langue", plural: "לשונות ארוכות" },
+            { group: "Féminins singuliers sans terminaison", singular: "נפש", translation: "âme", plural: "נפשות עייפות" },
+            { group: "Féminins singuliers sans terminaison", singular: "עצם", translation: "os", plural: "עצמות חזקות" },
+            { group: "Féminins singuliers sans terminaison", singular: "רוח", translation: "vent / esprit", plural: "רוחות חזקות" },
+            { group: "Féminins singuliers sans terminaison", singular: "שמש", translation: "soleil", plural: "שמשות חמות" }
+        ];
+
+        let filteredData = [];
+        let currentIndex = 0;
+        let unknownWordsList = [];
+        let isReviewMode = false;
+        let isListViewActive = false;
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function filterByGroup() {
+            const selectedGroup = document.getElementById('group-filter').value;
+            isReviewMode = false;
+            
+            if (selectedGroup === 'all') {
+                filteredData = shuffleArray(rawData);
+            } else {
+                filteredData = rawData.filter(item => item.group === selectedGroup);
+            }
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function displayCard() {
+            if (filteredData.length === 0) {
+                document.getElementById('word-singular').innerText = "Aucun mot";
+                document.getElementById('word-translation').innerText = "";
+                document.getElementById('word-plural').innerText = "";
+                document.getElementById('stat-progress').innerText = "0 sur 0";
+                return;
+            }
+
+            const currentItem = filteredData[currentIndex];
+            document.getElementById('word-singular').innerText = currentItem.singular;
+            document.getElementById('word-translation').innerText = currentItem.translation;
+            document.getElementById('stat-progress').innerText = `Carte ${currentIndex + 1} sur ${filteredData.length} ${isReviewMode ? '(Révision)' : ''}`;
+            document.getElementById('stat-mode').innerText = 'Mode Flashcard';
+
+            const fullDisplay = document.getElementById('word-plural');
+            fullDisplay.classList.add('hidden');
+            fullDisplay.innerText = currentItem.plural;
+        }
+
+        function handleCardClick() {
+            revealCard();
+        }
+
+        function revealCard() {
+            const currentItem = filteredData[currentIndex];
+            const fullDisplay = document.getElementById('word-plural');
+            fullDisplay.innerText = currentItem.plural;
+            fullDisplay.classList.remove('hidden');
+        }
+
+        function markAnswer(known) {
+            const currentItem = filteredData[currentIndex];
+            if (!known) {
+                if (!unknownWordsList.some(item => item.singular === currentItem.singular)) {
+                    unknownWordsList.push(currentItem);
+                }
+            } else {
+                let index = unknownWordsList.findIndex(item => item.singular === currentItem.singular);
+                if (index > -1) unknownWordsList.splice(index, 1);
+            }
+            updateReviewButton();
+            nextCard();
+        }
+
+        function nextCard() {
+            currentIndex++;
+            if (currentIndex >= filteredData.length) {
+                if (isReviewMode) {
+                    if (unknownWordsList.length > 0) {
+                        filteredData = shuffleArray(unknownWordsList);
+                        currentIndex = 0;
+                        displayCard();
+                        return;
+                    } else {
+                        isReviewMode = false;
+                        alert("🎉 Bravo ! Tu as terminé la révision de tous tes mots ratés.");
+                        filterByGroup();
+                        return;
+                    }
+                }
+                currentIndex = 0;
+            }
+            displayCard();
+        }
+
+        function prevCard() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = filteredData.length - 1;
+            }
+            displayCard();
+        }
+
+        function startReviewMode() {
+            if (unknownWordsList.length === 0) return;
+            isReviewMode = true;
+            filteredData = shuffleArray(unknownWordsList);
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function updateReviewButton() {
+            const btn = document.getElementById('review-btn');
+            btn.innerText = `Réviser les mots ratés (${unknownWordsList.length})`;
+            btn.disabled = unknownWordsList.length === 0;
+        }
+
+        // Gestion du Mode Liste
+        function toggleListView() {
+            isListViewActive = !isListViewActive;
+            const gameContainer = document.getElementById('game-container');
+            const statsBar = document.getElementById('stats-bar');
+            const listViewContainer = document.getElementById('list-view-container');
+            const btnToggle = document.getElementById('btn-toggle-list');
+
+            if (isListViewActive) {
+                gameContainer.classList.add('hidden');
+                statsBar.classList.add('hidden');
+                listViewContainer.classList.remove('hidden');
+                btnToggle.innerText = "🎮 Mode Jeu";
+                populateListView();
+            } else {
+                gameContainer.classList.remove('hidden');
+                statsBar.classList.remove('hidden');
+                listViewContainer.classList.add('hidden');
+                btnToggle.innerText = "📋 Mode Liste";
+            }
+        }
+
+        function populateListView() {
+            const tbody = document.getElementById('list-table-body');
+            let html = '';
+            rawData.forEach(item => {
+                html += `
+                    <tr>
+                        <td><b>${item.group}</b></td>
+                        <td class="rtl">${item.singular}</td>
+                        <td>${item.translation}</td>
+                        <td class="rtl">${item.plural}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        window.onload = () => {
+            filteredData = shuffleArray(rawData);
+            displayCard();
+        };
+    </script>
+</body>
+</html>
