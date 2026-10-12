@@ -138,6 +138,27 @@
             margin: 10px 0;
             min-height: 30px;
             direction: rtl;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .audio-btn {
+            background: #e0e7ff;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .audio-btn:hover {
+            background: #c7d2fe;
         }
 
         .hint-text {
@@ -268,11 +289,14 @@
             <button class="nav-btn" onclick="prevCard()">❮</button>
             
             <div class="card" onclick="handleCardClick()">
-                <div class="hint-text">Trouvez le pluriel / la forme associée (Cliquez pour retourner) :</div>
+                <div class="hint-text">Trouvez le pluriel / la forma associée (Cliquez pour retourner) :</div>
                 <div class="hebrew-word" id="word-singular">אב</div>
                 <div class="translation-text" id="word-translation">père</div>
                 
-                <div class="answer-reveal hidden" id="word-plural">אבות כנענים</div>
+                <div class="answer-reveal hidden" id="word-reveal-container">
+                    <span id="word-plural">אבות כנענים</span>
+                    <button class="audio-btn" onclick="event.stopPropagation(); playAudio(document.getElementById('word-plural').innerText)" title="Écouter">🔊</button>
+                </div>
 
                 <!-- Boutons interactifs Flashcard -->
                 <div id="flashcard-controls" style="width: 100%;">
@@ -292,9 +316,9 @@
                 <thead>
                     <tr>
                         <th>Catégorie</th>
-                        <th>Singulier / Mot de base</th>
+                        <th>Singulier</th>
                         <th>Traduction</th>
-                        <th>Pluriel / Forme associée</th>
+                        <th>Pluriel / Audio</th>
                     </tr>
                 </thead>
                 <tbody id="list-table-body">
@@ -444,6 +468,19 @@
         let isReviewMode = false;
         let isListViewActive = false;
 
+        // Fonction pour lire le texte en hébreu via la synthèse vocale du navigateur
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stoppe toute lecture en cours
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'he-IL'; // Définit la langue sur l'hébreu
+                utterance.rate = 0.9; // Vitesse légèrement ralentie pour bien comprendre
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("La synthèse vocale n'est pas supportée par votre navigateur.");
+            }
+        }
+
         function shuffleArray(array) {
             let arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -473,7 +510,7 @@
             if (filteredData.length === 0) {
                 document.getElementById('word-singular').innerText = "Aucun mot";
                 document.getElementById('word-translation').innerText = "";
-                document.getElementById('word-plural').innerText = "";
+                document.getElementById('word-reveal-container').classList.add('hidden');
                 document.getElementById('stat-progress').innerText = "0 sur 0";
                 return;
             }
@@ -484,9 +521,9 @@
             document.getElementById('stat-progress').innerText = `Carte ${currentIndex + 1} sur ${filteredData.length} ${isReviewMode ? '(Révision)' : ''}`;
             document.getElementById('stat-mode').innerText = 'Mode Flashcard';
 
-            const fullDisplay = document.getElementById('word-plural');
-            fullDisplay.classList.add('hidden');
-            fullDisplay.innerText = currentItem.plural;
+            const revealContainer = document.getElementById('word-reveal-container');
+            revealContainer.classList.add('hidden');
+            document.getElementById('word-plural').innerText = currentItem.plural;
         }
 
         function handleCardClick() {
@@ -495,9 +532,9 @@
 
         function revealCard() {
             const currentItem = filteredData[currentIndex];
-            const fullDisplay = document.getElementById('word-plural');
-            fullDisplay.innerText = currentItem.plural;
-            fullDisplay.classList.remove('hidden');
+            const revealContainer = document.getElementById('word-reveal-container');
+            document.getElementById('word-plural').innerText = currentItem.plural;
+            revealContainer.classList.remove('hidden');
         }
 
         function markAnswer(known) {
@@ -583,7 +620,6 @@
             const tbody = document.getElementById('list-table-body');
             const selectedGroup = document.getElementById('group-filter').value;
             
-            // Filtre les données selon la catégorie sélectionnée
             let dataToDisplay = rawData;
             if (selectedGroup !== 'all') {
                 dataToDisplay = rawData.filter(item => item.group === selectedGroup);
@@ -596,7 +632,10 @@
                         <td><b>${item.group}</b></td>
                         <td class="rtl">${item.singular}</td>
                         <td>${item.translation}</td>
-                        <td class="rtl">${item.plural}</td>
+                        <td class="rtl">
+                            ${item.plural} 
+                            <button class="audio-btn" style="width:28px; height:28px; font-size:0.8rem; margin-right:5px;" onclick="playAudio('${item.plural}')" title="Écouter">🔊</button>
+                        </td>
                     </tr>
                 `;
             });
