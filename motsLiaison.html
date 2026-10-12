@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mémorisation Mots de liaison Hébreu</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: black;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .stats-bar {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+
+        .card-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            min-height: 200px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .french-word {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .hebrew-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 15px;
+            direction: rtl;
+        }
+
+        .hint-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .btn-know {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            flex: 1;
+        }
+
+        .btn-know:hover {
+            background-color: #15803d;
+        }
+
+        .btn-dont-know {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            flex: 1;
+        }
+
+        .btn-dont-know:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-audio {
+            font-size: 1rem;
+            margin-top: 15px;
+            background: #e0e7ff;
+            border: none;
+            color: var(--primary);
+            padding: 8px 16px;
+        }
+
+        .btn-audio:hover {
+            background: #c7d2fe;
+        }
+
+        .list-container {
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .td-hebrew {
+            direction: rtl;
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Mots de liaison Hébreu</h1>
+        <div>
+            <button onclick="window.location.href='index.html'">🏠 Accueil</button>
+        </div>
+    </header>
+
+    <div class="controls">
+        <select id="categorySelect" onchange="filterCategory()">
+            <option value="ALL">Toutes les catégories</option>
+        </select>
+
+        <button onclick="shuffleWords()">🔀 Mélanger</button>
+        <button onclick="toggleListView()">📋 Mode Liste</button>
+        <button id="reviewBtn" onclick="reviewUnknownWords()">📖 Réviser les mots à réviser</button>
+        <button onclick="resetProgress()">🔄 Réinitialiser</button>
+    </div>
+
+    <div class="stats-bar">
+        <span>Cartes : <strong id="currentStats">0 / 0</strong></span>
+        <span>Maîtrisés : <strong id="knownCount" style="color:var(--success)">0</strong></span>
+        <span>À réviser : <strong id="unknownCount" style="color:var(--danger)">0</strong></span>
+    </div>
+
+    <div id="flashcardView">
+        <div class="card-container">
+            <button class="nav-btn" onclick="prevCard()">←</button>
+            
+            <div id="card" class="card" onclick="revealAnswer()">
+                <div id="frenchText" class="french-word">Chargement...</div>
+                <div id="hebrewContainer" class="hidden">
+                    <div id="hebrewText" class="hebrew-word"></div>
+                    <button class="btn-audio" onclick="event.stopPropagation(); speakHebrew();">🔊 Écouter</button>
+                </div>
+                <div id="hint" class="hint-text">Cliquez pour afficher le mot en hébreu</div>
+            </div>
+
+            <button class="nav-btn" onclick="nextCard()">→</button>
+        </div>
+
+        <div id="answerActions" class="actions">
+            <button class="btn-dont-know" onclick="markAnswer(false)">❌ Je ne connais pas</button>
+            <button class="btn-know" onclick="markAnswer(true)">✅ Je connais</button>
+        </div>
+    </div>
+
+    <div id="listView" class="list-container hidden">
+        <h3>Mots de la catégorie</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Français</th>
+                    <th style="text-align: right;">Hébreu</th>
+                    <th>Écouter</th>
+                </tr>
+            </thead>
+            <tbody id="wordsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let isReviewMode = false;
+
+    const rawData = [
+        // 1. Les mots de raison — הסיבה
+        { categorie: "1. Raison", francais: "parce que / car", hebreu: "כי" },
+        { categorie: "1. Raison", francais: "parce que", hebreu: "מפני ש־" },
+        { categorie: "1. Raison", francais: "étant donné que / parce que", hebreu: "משום ש־" },
+        { categorie: "1. Raison", francais: "à cause de", hebreu: "בגלל" },
+        { categorie: "1. Raison", francais: "parce que / à cause du fait que", hebreu: "בגלל ש־" },
+        { categorie: "1. Raison", francais: "puisque / étant donné que", hebreu: "מכיוון ש־" },
+        { categorie: "1. Raison", francais: "puisque / étant donné que", hebreu: "מאחר ש־" },
+        { categorie: "1. Raison", francais: "du fait que / étant donné que", hebreu: "היות ש־" },
+        { categorie: "1. Raison", francais: "grâce à", hebreu: "בזכות" },
+        { categorie: "1. Raison", francais: "à la suite de / en raison de", hebreu: "עקב" },
+
+        // 2. Les mots de conséquence — תוצאה
+        { categorie: "2. Conséquence", francais: "donc / c'est pourquoi", hebreu: "לכן" },
+        { categorie: "2. Conséquence", francais: "par conséquent", hebreu: "לפיכך" },
+        { categorie: "2. Conséquence", francais: "par conséquent / à la suite de cela", hebreu: "כתוצאה מכך" },
+        { categorie: "2. Conséquence", francais: "pour cette raison", hebreu: "משום כך" },
+        { categorie: "2. Conséquence", francais: "à cause de cela / c'est pour ça", hebreu: "בגלל זה" },
+        { categorie: "2. Conséquence", francais: "à la suite de cela", hebreu: "בעקבות זאת" },
+        { categorie: "2. Conséquence", francais: "si bien que / de sorte que", hebreu: "כך ש־" },
+        { categorie: "2. Conséquence", francais: "alors / donc", hebreu: "אז" },
+        { categorie: "2. Conséquence", francais: "d'où le fait que / il en résulte que", hebreu: "מכאן ש־" },
+        { categorie: "2. Conséquence", francais: "en conséquence de cela", hebreu: "כתוצאה מזה" },
+
+        // 3. Les mots de transition — מילות מעבר
+        { categorie: "3. Transition", francais: "de plus / en outre", hebreu: "בנוסף" },
+        { categorie: "3. Transition", francais: "également / de même", hebreu: "כמו כן" },
+        { categorie: "3. Transition", francais: "qui plus est", hebreu: "יתר על כן" },
+        { categorie: "3. Transition", francais: "au-delà de cela / de plus", hebreu: "מעבר לכך" },
+        { categorie: "3. Transition", francais: "premièrement / tout d'abord", hebreu: "ראשית" },
+        { categorie: "3. Transition", francais: "deuxièmement", hebreu: "שנית" },
+        { categorie: "3. Transition", francais: "enfin / finalement", hebreu: "לבסוף" },
+        { categorie: "3. Transition", francais: "en résumé / pour conclure", hebreu: "לסיכום" },
+        { categorie: "3. Transition", francais: "par exemple", hebreu: "למשל" },
+        { categorie: "3. Transition", francais: "c'est-à-dire", hebreu: "כלומר" },
+        { categorie: "3. Transition", francais: "en fait", hebreu: "למעשה" },
+        { categorie: "3. Transition", francais: "d'un côté", hebreu: "מצד אחד" },
+        { categorie: "3. Transition", francais: "d'un autre côté", hebreu: "מצד שני" },
+        { categorie: "3. Transition", francais: "au fait / soit dit en passant", hebreu: "אגב" },
+        { categorie: "3. Transition", francais: "dans tous les cas", hebreu: "בכל מקרה" },
+
+        // 4. Les mots de temps — זמן
+        { categorie: "4. Temps", francais: "lorsque", hebreu: "כאשר" },
+        { categorie: "4. Temps", francais: "quand / lorsque", hebreu: "כש־" },
+        { categorie: "4. Temps", francais: "pendant que", hebreu: "בזמן ש־" },
+        { categorie: "4. Temps", francais: "avant que", hebreu: "לפני ש־" },
+        { categorie: "4. Temps", francais: "après que", hebreu: "אחרי ש־" },
+        { categorie: "4. Temps", francais: "ensuite / après cela", hebreu: "לאחר מכן" },
+        { categorie: "4. Temps", francais: "auparavant", hebreu: "לפני כן" },
+        { categorie: "4. Temps", francais: "entre-temps", hebreu: "בינתיים" },
+        { categorie: "4. Temps", francais: "immédiatement", hebreu: "מיד" },
+        { categorie: "4. Temps", francais: "dès que / au moment où", hebreu: "ברגע ש־" },
+        { categorie: "4. Temps", francais: "jusqu'à ce que", hebreu: "עד ש־" },
+        { categorie: "4. Temps", francais: "tant que", hebreu: "כל עוד" },
+        { categorie: "4. Temps", francais: "depuis que", hebreu: "מאז ש־" },
+        { categorie: "4. Temps", francais: "récemment", hebreu: "לאחרונה" },
+        { categorie: "4. Temps", francais: "avant tout", hebreu: "קודם כול" },
+        { categorie: "4. Temps", francais: "finalement / en fin de compte", hebreu: "בסופו של דבר" },
+        { categorie: "4. Temps", francais: "de temps en temps", hebreu: "מדי פעם" },
+
+        // 5. Les mots de processus et d'ordre — תהליך וסדר
+        { categorie: "5. Processus et ordre", francais: "tout d'abord", hebreu: "קודם כול" },
+        { categorie: "5. Processus et ordre", francais: "au début", hebreu: "בהתחלה" },
+        { categorie: "5. Processus et ordre", francais: "initialement / en premier lieu", hebreu: "תחילה" },
+        { categorie: "5. Processus et ordre", francais: "premièrement", hebreu: "ראשית" },
+        { categorie: "5. Processus et ordre", francais: "ensuite", hebreu: "לאחר מכן" },
+        { categorie: "5. Processus et ordre", francais: "à l'étape suivante", hebreu: "בשלב הבא" },
+        { categorie: "5. Processus et ordre", francais: "par la suite", hebreu: "בהמשך" },
+        { categorie: "5. Processus et ordre", francais: "parallèlement / simultanément", hebreu: "במקביל" },
+        { categorie: "5. Processus et ordre", francais: "pendant ce temps / ce faisant", hebreu: "תוך כדי כך" },
+        { categorie: "5. Processus et ordre", francais: "après", hebreu: "לאחר" },
+        { categorie: "5. Processus et ordre", francais: "avant", hebreu: "לפני" },
+        { categorie: "5. Processus et ordre", francais: "à la fin", hebreu: "בסוף" },
+        { categorie: "5. Processus et ordre", francais: "finalement", hebreu: "לבסוף" },
+        { categorie: "5. Processus et ordre", francais: "pour terminer", hebreu: "לסיום" },
+        { categorie: "5. Processus et ordre", francais: "étape par étape", hebreu: "שלב אחר שלב" },
+
+        // 6. Les mots d'opposition — ניגוד
+        { categorie: "6. Opposition", francais: "mais", hebreu: "אבל" },
+        { categorie: "6. Opposition", francais: "mais / toutefois", hebreu: "אך" },
+        { categorie: "6. Opposition", francais: "cependant / toutefois", hebreu: "אולם" },
+        { categorie: "6. Opposition", francais: "en revanche / par contre", hebreu: "לעומת זאת" },
+        { categorie: "6. Opposition", francais: "d'un autre côté", hebreu: "מצד שני" },
+        { categorie: "6. Opposition", francais: "malgré", hebreu: "למרות" },
+        { categorie: "6. Opposition", francais: "bien que / même si", hebreu: "למרות ש־" },
+        { categorie: "6. Opposition", francais: "bien que / quoique", hebreu: "אף על פי ש־" },
+        { categorie: "6. Opposition", francais: "malgré cela / néanmoins", hebreu: "אף על פי כן" },
+        { categorie: "6. Opposition", francais: "toutefois / cela dit", hebreu: "עם זאת" },
+        { categorie: "6. Opposition", francais: "et malgré tout", hebreu: "ובכל זאת" },
+        { categorie: "6. Opposition", francais: "contrairement à", hebreu: "בניגוד ל־" },
+        { categorie: "6. Opposition", francais: "tandis que / alors que", hebreu: "בעוד ש־" },
+        { categorie: "6. Opposition", francais: "tandis que / alors que", hebreu: "ואילו" },
+        { categorie: "6. Opposition", francais: "d'un côté... de l'autre", hebreu: "מצד אחד... מצד שני" },
+
+        // 7. Les mots de but — מטרה
+        { categorie: "7. But", francais: "pour / afin de", hebreu: "כדי" },
+        { categorie: "7. But", francais: "afin que", hebreu: "כדי ש־" },
+        { categorie: "7. But", francais: "dans le but de", hebreu: "במטרה ל־" },
+        { categorie: "7. But", francais: "afin de", hebreu: "על מנת ל־" },
+        { categorie: "7. But", francais: "afin que", hebreu: "על מנת ש־" },
+        { categorie: "7. But", francais: "à cette fin / pour cela", hebreu: "לשם כך" },
+
+        // 8. Les mots de condition — תנאי
+        { categorie: "8. Condition", francais: "si", hebreu: "אם" },
+        { categorie: "8. Condition", francais: "à condition que", hebreu: "בתנאי ש־" },
+        { categorie: "8. Condition", francais: "à moins que", hebreu: "אלא אם כן" },
+        { categorie: "8. Condition", francais: "tant que", hebreu: "כל עוד" },
+        { categorie: "8. Condition", francais: "au cas où / dans le cas où", hebreu: "במקרה ש־" },
+        { categorie: "8. Condition", francais: "même si", hebreu: "אפילו אם" },
+
+        // 9. Les mots d'exemple et d'illustration — דוגמה והמחשה
+        { categorie: "9. Exemple", francais: "par exemple", hebreu: "למשל" },
+        { categorie: "9. Exemple", francais: "par exemple", hebreu: "לדוגמה" },
+        { categorie: "9. Exemple", francais: "tel que / tels que", hebreu: "כגון" },
+        { categorie: "9. Exemple", francais: "en particulier", hebreu: "בפרט" },
+        { categorie: "9. Exemple", francais: "notamment / particulièrement", hebreu: "במיוחד" },
+        { categorie: "9. Exemple", francais: "à mon avis", hebreu: "לדעתי" },
+        { categorie: "9. Exemple", francais: "par exemple, de cette manière", hebreu: "למשל כך" },
+
+        // 10. Les mots de comparaison — השוואה
+        { categorie: "10. Comparaison", francais: "comme", hebreu: "כמו" },
+        { categorie: "10. Comparaison", francais: "à l'image de / similaire à", hebreu: "בדומה ל־" },
+        { categorie: "10. Comparaison", francais: "comparé à", hebreu: "בהשוואה ל־" },
+        { categorie: "10. Comparaison", francais: "plus que", hebreu: "יותר מ־" },
+        { categorie: "10. Comparaison", francais: "moins que", hebreu: "פחות מ־" },
+        { categorie: "10. Comparaison", francais: "dans la même mesure", hebreu: "באותה מידה" },
+        { categorie: "10. Comparaison", francais: "comme / ainsi que", hebreu: "כפי ש־" },
+
+        // 11. Les mots d'ajout — הוספה
+        { categorie: "11. Ajout", francais: "et", hebreu: "ו־" },
+        { categorie: "11. Ajout", francais: "aussi / également", hebreu: "גם" },
+        { categorie: "11. Ajout", francais: "en plus de cela", hebreu: "נוסף על כך" },
+        { categorie: "11. Ajout", francais: "de plus / qui plus est", hebreu: "יתרה מזאת" },
+        { categorie: "11. Ajout", francais: "non seulement... mais aussi", hebreu: "לא רק... אלא גם" },
+        { categorie: "11. Ajout", francais: "de même / également", hebreu: "כמו כן" },
+
+        // 12. Les mots de conclusion et de résumé — סיכום ומסקנה
+        { categorie: "12. Conclusion", francais: "en résumé", hebreu: "לסיכום" },
+        { categorie: "12. Conclusion", francais: "en fin de compte", hebreu: "בסופו של דבר" },
+        { categorie: "12. Conclusion", francais: "dans l'ensemble / au total", hebreu: "בסך הכול" },
+        { categorie: "12. Conclusion", francais: "il en découle que", hebreu: "מכאן נובע ש־" },
+        { categorie: "12. Conclusion", francais: "on peut en déduire que", hebreu: "מכאן אפשר להסיק ש־" },
+        { categorie: "12. Conclusion", francais: "la conclusion est que", hebreu: "המסקנה היא ש־" },
+        { categorie: "12. Conclusion", francais: "en somme", hebreu: "בסיכומו של דבר" }
+    ];
+
+    let currentList = [];
+    let currentIndex = 0;
+    let knownWords = new Set();
+    let unknownWords = new Set();
+    let isListView = false;
+
+    window.onload = function () {
+        loadProgress();
+        applyFilters();
+    };
+
+    function wordKey(w) {
+        return w.categorie + "|" + w.francais + "|" + w.hebreu;
+    }
+
+    function applyFilters() {
+        initCategories();
+        const cat = document.getElementById("categorySelect").value;
+
+        currentList = rawData.filter(w =>
+            (cat === "ALL" || w.categorie === cat) &&
+            (!isReviewMode || unknownWords.has(wordKey(w)))
+        );
+
+        currentIndex = 0;
+        document.getElementById("reviewBtn").textContent =
+            isReviewMode ? "↩️ Quitter la révision" : "📖 Réviser les mots à réviser";
+
+        showCurrentCard();
+        renderListView();
+    }
+
+    function filterCategory() { applyFilters(); }
+
+    function initCategories() {
+        const select = document.getElementById("categorySelect");
+        const previous = select.value || "ALL";
+
+        select.innerHTML = '<option value="ALL">Toutes les catégories</option>';
+
+        const categories = [...new Set(rawData.map(w => w.categorie))].sort((a, b) => {
+            return parseInt(a) - parseInt(b);
+        });
+
+        categories.forEach(cat => {
+            const words = rawData.filter(w => w.categorie === cat);
+            if (words.length === 0) return;
+
+            const known = words.filter(w => knownWords.has(wordKey(w))).length;
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = `${cat} — ${known}/${words.length}`;
+            select.appendChild(option);
+        });
+
+        const exists = [...select.options].some(o => o.value === previous);
+        select.value = exists ? previous : "ALL";
+    }
+
+    function reviewUnknownWords() {
+        if (!isReviewMode && unknownWords.size === 0) {
+            alert("Aucun mot à réviser pour le moment ! Marquez des mots avec 'Je ne connais pas' d'abord.");
+            return;
+        }
+        isReviewMode = !isReviewMode;
+        applyFilters();
+    }
+
+    function shuffleWords() {
+        for (let i = currentList.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentList[i], currentList[j]] = [currentList[j], currentList[i]];
+        }
+        currentIndex = 0;
+        showCurrentCard();
+        renderListView();
+    }
+
+    function showCurrentCard() {
+        if (currentList.length === 0) {
+            document.getElementById("frenchText").textContent =
+                isReviewMode ? "Plus aucun mot à réviser 🎉" : "Aucun mot dans cette liste.";
+            document.getElementById("hebrewContainer").classList.add("hidden");
+            document.getElementById("hint").classList.add("hidden");
+            document.getElementById("answerActions").classList.add("hidden");
+            updateStats();
+            return;
+        }
+
+        document.getElementById("answerActions").classList.remove("hidden");
+        const item = currentList[currentIndex];
+        document.getElementById("frenchText").textContent = item.francais;
+        document.getElementById("hebrewText").textContent = item.hebreu;
+
+        document.getElementById("hebrewContainer").classList.add("hidden");
+        document.getElementById("hint").classList.remove("hidden");
+        updateStats();
+    }
+
+    function nextCard() {
+        if (currentList.length === 0) return;
+        currentIndex = (currentIndex + 1) % currentList.length;
+        showCurrentCard();
+    }
+
+    function prevCard() {
+        if (currentList.length === 0) return;
+        currentIndex = (currentIndex - 1 + currentList.length) % currentList.length;
+        showCurrentCard();
+    }
+
+    function revealAnswer() {
+        if (currentList.length === 0) return;
+        document.getElementById("hebrewContainer").classList.remove("hidden");
+        document.getElementById("hint").classList.add("hidden");
+    }
+
+    function markAnswer(known) {
+        if (currentList.length === 0) return;
+        const key = wordKey(currentList[currentIndex]);
+
+        if (known) {
+            knownWords.add(key);
+            unknownWords.delete(key);
+        } else {
+            unknownWords.add(key);
+            knownWords.delete(key);
+        }
+        saveProgress();
+        initCategories();
+
+        if (isReviewMode && known) {
+            currentList.splice(currentIndex, 1);
+            if (currentIndex >= currentList.length) currentIndex = 0;
+            showCurrentCard();
+            renderListView();
+        } else {
+            nextCard();
+        }
+    }
+
+    function updateStats() {
+        document.getElementById("currentStats").textContent =
+            `${currentList.length > 0 ? currentIndex + 1 : 0} / ${currentList.length}`;
+        document.getElementById("knownCount").textContent = knownWords.size;
+        document.getElementById("unknownCount").textContent = unknownWords.size;
+    }
+
+    function speakText(text) {
+        const cleanText = text.replace('־', '').trim();
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=iw&client=tw-ob`;
+
+        const audio = new Audio(audioUrl);
+        audio.play().catch(() => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(cleanText);
+                u.lang = 'he';
+                u.rate = 0.8;
+                window.speechSynthesis.speak(u);
+            }
+        });
+    }
+
+    function speakHebrew() {
+        speakText(document.getElementById("hebrewText").textContent);
+    }
+
+    function toggleListView() {
+        isListView = !isListView;
+        document.getElementById("flashcardView").classList.toggle("hidden", isListView);
+        document.getElementById("listView").classList.toggle("hidden", !isListView);
+    }
+
+    function renderListView() {
+        const tbody = document.getElementById("wordsTableBody");
+        tbody.innerHTML = "";
+
+        currentList.forEach(item => {
+            const tr = document.createElement("tr");
+
+            const tdFr = document.createElement("td");
+            tdFr.textContent = item.francais;
+
+            const tdHe = document.createElement("td");
+            tdHe.className = "td-hebrew";
+            tdHe.textContent = item.hebreu;
+
+            const tdBtn = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.style.cssText = "padding: 4px 8px; font-size: 0.9rem;";
+            btn.textContent = "🔊";
+            btn.addEventListener("click", () => speakText(item.hebreu));
+            tdBtn.appendChild(btn);
+
+            tr.append(tdFr, tdHe, tdBtn);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function saveProgress() {
+        localStorage.setItem("hebrew_liaison_known", JSON.stringify([...knownWords]));
+        localStorage.setItem("hebrew_liaison_unknown", JSON.stringify([...unknownWords]));
+    }
+
+    function loadProgress() {
+        try {
+            const k = localStorage.getItem("hebrew_liaison_known");
+            const u = localStorage.getItem("hebrew_liaison_unknown");
+            if (k) knownWords = new Set(JSON.parse(k));
+            if (u) unknownWords = new Set(JSON.parse(u));
+        } catch (e) {
+            knownWords = new Set();
+            unknownWords = new Set();
+        }
+    }
+
+    function resetProgress() {
+        if (confirm("Voulez-vous réinitialiser le suivi de votre progression ?")) {
+            knownWords.clear();
+            unknownWords.clear();
+            localStorage.removeItem("hebrew_liaison_known");
+            localStorage.removeItem("hebrew_liaison_unknown");
+            isReviewMode = false;
+            applyFilters();
+        }
+    }
+</script>
+</body>
+</html>
