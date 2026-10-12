@@ -397,14 +397,14 @@
             { group: "Noms du corps et duels", singular: "עפעף (זכר)", translation: "paupière", plural: "עפעפיים אדומים" },
             { group: "Noms du corps et duels", singular: "אופן (זכר)", translation: "roue / vélo", plural: "אופניים מהירים" },
             { group: "Noms du corps et duels", singular: "גרב (זכר)", translation: "chaussette", plural: "גרביים צבעוניים" },
-            { group: "Noms du corps et duels", singular: "מגף (זכר)", translation: "botted", plural: "מגפיים שחורים" },
+            { group: "Noms du corps et duels", singular: "מגף (זכר)", translation: "botte", plural: "מגפיים שחורים" },
             { group: "Noms du corps et duels", singular: "מכנס (זכר)", translation: "pantalon", plural: "מכנסיים קצרים" },
             { group: "Noms du corps et duels", singular: "מספר (זכר)", translation: "ciseaux", plural: "מספריים חדים" },
             { group: "Noms du corps et duels", singular: "משקף (זכר)", translation: "lunettes", plural: "משקפיים עגולים" },
             { group: "Noms du corps et duels", singular: "אוזן (נקבה)", translation: "oreille", plural: "אוזניים גדולות" },
             { group: "Noms du corps et duels", singular: "ברך (נקבה)", translation: "genou", plural: "ברכיים ארוכות" },
             { group: "Noms du corps et duels", singular: "יד (נקבה)", translation: "main", plural: "ידיים חמות" },
-            { group: "Noms du corps et duels", singular: "לחי (נקבה)", translation: "joue", plural: "לחיים وרודות" },
+            { group: "Noms du corps et duels", singular: "לחי (נקבה)", translation: "joue", plural: "לחיים ורודות" },
             { group: "Noms du corps et duels", singular: "עין (נקבה)", translation: "œil", plural: "עיניים כחולות" },
             { group: "Noms du corps et duels", singular: "רגל (נקבה)", translation: "pied / jambe", plural: "רגליים קצרות" },
             { group: "Noms du corps et duels", singular: "שן (נקבה)", translation: "dent", plural: "שיניים לבנות" },
@@ -464,6 +464,9 @@
             }
             currentIndex = 0;
             displayCard();
+            if (isListViewActive) {
+                populateListView();
+            }
         }
 
         function displayCard() {
@@ -578,8 +581,16 @@
 
         function populateListView() {
             const tbody = document.getElementById('list-table-body');
+            const selectedGroup = document.getElementById('group-filter').value;
+            
+            // Filtre les données selon la catégorie sélectionnée
+            let dataToDisplay = rawData;
+            if (selectedGroup !== 'all') {
+                dataToDisplay = rawData.filter(item => item.group === selectedGroup);
+            }
+
             let html = '';
-            rawData.forEach(item => {
+            dataToDisplay.forEach(item => {
                 html += `
                     <tr>
                         <td><b>${item.group}</b></td>
