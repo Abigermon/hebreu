@@ -2100,11 +2100,11 @@ const rawData = [
 { categorie: "Pollution", francais: "Eaux souterraines", hebreu: "מי תהום", niveau: "Beth" },
 { categorie: "Pollution", francais: "Réutilisation", hebreu: "שימוש חוזר", niveau: "Beth" },
 
-{ categorie: "Pollution", francais: "Nuisance environnementale / Danger environnemental", hebreu: "מפגע סביבתי", niveau: "Gimel" },
-{ categorie: "Pollution", francais: "Niveau de rayonnement / de radiation", hebreu: "רמת קרינה", niveau: "Gimel" },
-{ categorie: "Pollution", francais: "Promulguer une loi...", hebreu: "חוקק את...", niveau: "Gimel" },
-{ categorie: "Pollution", francais: "Recycler...", hebreu: "מחזר את...", niveau: "Gimel" },
-{ categorie: "Pollution", francais: "Aider...", hebreu: "סייע ל...", niveau: "Gimel" },
+{ categorie: "Pollution", francais: "Nuisance environnementale / Danger environnemental", hebreu: "מפגע סביבתי", niveau: "Guimel" },
+{ categorie: "Pollution", francais: "Niveau de rayonnement / de radiation", hebreu: "רמת קרינה", niveau: "Guimel" },
+{ categorie: "Pollution", francais: "Promulguer une loi...", hebreu: "חוקק את...", niveau: "Guimel" },
+{ categorie: "Pollution", francais: "Recycler...", hebreu: "מחזר את...", niveau: "Guimel" },
+{ categorie: "Pollution", francais: "Aider...", hebreu: "סייע ל...", niveau: "Guimel" },
 
 
 //Météo 
@@ -2150,21 +2150,21 @@ const rawData = [
 { categorie: "Météo", francais: "Être bloqué / Obstrué", hebreu: "להיחסם", niveau: "Beth" },
 { categorie: "Météo", francais: "Éclater / Faire irruption / Jaillir", hebreu: "לפרוץ", niveau: "Beth" },
 
-{ categorie: "Météo", francais: "Brumeux / Poussiéreux", hebreu: "אביך", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Nuageux", hebreu: "מעונן", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Sauveteur / Salvateur", hebreu: "מציל", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Légèrement / Un peu", hebreu: "במקצת", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Inondation / Submersion", hebreu: "הצפה", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Réchauffement", hebreu: "התחממות", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Refroidissement", hebreu: "התקררות", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Lever du soleil", hebreu: "זריחה", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Coucher du soleil", hebreu: "שקיעה", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Incendie", hebreu: "שריפה", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Allumage / Incendie criminel", hebreu: "הצתה", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Surmonter / Vaincre", hebreu: "להתגבר על", niveau: "Gimel" },
-{ categorie: "Météo", francais: "S'étendre vers / Se propager à", hebreu: "להתפשט ל...", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Secourir / Extraire quelqu'un de...", hebreu: "לחלץ את... מ...", niveau: "Gimel" },
-{ categorie: "Météo", francais: "Se noyer dans...", hebreu: "לטבוע ב...", niveau: "Gimel" },
+{ categorie: "Météo", francais: "Brumeux / Poussiéreux", hebreu: "אביך", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Nuageux", hebreu: "מעונן", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Sauveteur / Salvateur", hebreu: "מציל", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Légèrement / Un peu", hebreu: "במקצת", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Inondation / Submersion", hebreu: "הצפה", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Réchauffement", hebreu: "התחממות", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Refroidissement", hebreu: "התקררות", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Lever du soleil", hebreu: "זריחה", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Coucher du soleil", hebreu: "שקיעה", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Incendie", hebreu: "שריפה", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Allumage / Incendie criminel", hebreu: "הצתה", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Surmonter / Vaincre", hebreu: "להתגבר על", niveau: "Guimel" },
+{ categorie: "Météo", francais: "S'étendre vers / Se propager à", hebreu: "להתפשט ל...", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Secourir / Extraire quelqu'un de...", hebreu: "לחלץ את... מ...", niveau: "Guimel" },
+{ categorie: "Météo", francais: "Se noyer dans...", hebreu: "לטבוע ב...", niveau: "Guimel" },
 
 
 ];
@@ -2319,10 +2319,20 @@ function markAnswer(known) {
 }
 
 function updateStats() {
+    const cat = document.getElementById("categorySelect").value;
+    const lvl = document.getElementById("levelSelect").value;
+
+    const base = rawData.filter(w =>
+        (cat === "ALL" || w.categorie === cat) &&
+        (lvl === "ALL" || w.niveau === lvl)
+    );
+    const known   = base.filter(w => knownWords.has(wordKey(w))).length;
+    const unknown = base.filter(w => unknownWords.has(wordKey(w))).length;
+
     document.getElementById("currentStats").textContent =
         `${currentList.length > 0 ? currentIndex + 1 : 0} / ${currentList.length}`;
-    document.getElementById("knownCount").textContent = knownWords.size;
-    document.getElementById("unknownCount").textContent = unknownWords.size;
+    document.getElementById("knownCount").textContent = known;
+    document.getElementById("unknownCount").textContent = unknown;
 }
 
 function speakText(text) {
